@@ -1080,15 +1080,15 @@ body {
 
 .camera-toggle-btn {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 40px;
-  height: 40px;
-  background: rgba(0, 0, 0, 0.7);
-  border: 2px solid rgba(255, 255, 255, 0.4);
+  top: 12px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   color: var(--white);
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1097,15 +1097,13 @@ body {
   z-index: 10;
   backdrop-filter: blur(10px);
   box-shadow: var(--shadow-light);
-  opacity: 1; /* Asegurar visibilidad */
 }
 
 .camera-toggle-btn:hover {
-  background: rgba(0, 0, 0, 0.9);
-  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 0.5);
   transform: scale(1.05);
   box-shadow: var(--shadow-medium);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
 }
 
 .camera-toggle-btn:active {
@@ -1118,10 +1116,6 @@ body {
 
 .camera-toggle-btn:hover i {
   transform: rotate(180deg);
-}
-
-.camera-toggle-btn.hidden {
-  display: none !important; /* Ocultar cuando no hay múltiples cámaras */
 }
 
 /* ========================================
@@ -1476,17 +1470,17 @@ body {
 }
 
 .manual-code-input {
-  font-size: 1.2rem; /* Reducir tamaño de fuente */
-  width: 60px; /* Más pequeño, solo para 5 caracteres */
-  max-width: 70px;
+  font-size: 1.5rem; /* Texto grande */
+  width: 80px; /* Campo compacto - máximo 5 caracteres */
+  max-width: 100px;
   text-align: center;
-  padding: 0.3rem;
+  padding: 0.5rem;
   border: none;
   background: transparent;
   color: var(--white);
   font-weight: var(--font-weight-bold);
   font-family: var(--font-primary);
-  letter-spacing: 0.1rem; /* Espaciado entre caracteres */
+  letter-spacing: 0.15rem; /* Espaciado entre caracteres */
   outline: none;
   transition: all 0.3s ease;
 }
@@ -1559,10 +1553,10 @@ body {
   }
   
   .manual-code-input {
-    font-size: 1.1rem;
-    width: 55px;
-    max-width: 65px;
-    padding: 0.25rem;
+    font-size: 1.3rem;
+    width: 70px;
+    max-width: 90px;
+    padding: 0.4rem;
   }
 }
 
@@ -1598,210 +1592,15 @@ body {
   }
   
   .manual-code-input {
-    font-size: 1rem;
-    width: 50px;
-    max-width: 60px;
-    padding: 0.2rem;
+    font-size: 1.2rem;
+    width: 65px;
+    max-width: 80px;
+    padding: 0.3rem;
   }
   
   #submit-manual-btn {
     min-width: 120px;
     padding: 12px 16px;
-  }
-}
-/* ========================================
-   ESTILOS PARA SELECTOR DE CÁMARA
-   ======================================== */
-
-.camera-selector-section {
-  margin: 1rem 0;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--border-radius-small);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(20px);
-}
-
-.camera-selector-section h3 {
-  margin: 0 0 1rem 0;
-  color: var(--white);
-  font-size: 16px;
-  font-weight: var(--font-weight-semibold);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.camera-selector-section h3 i {
-  color: var(--accent-gold);
-  font-size: 18px;
-}
-
-.camera-options {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.camera-option {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--border-radius-small);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-}
-
-.camera-option:hover {
-  border-color: var(--secondary-blue);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.camera-option.selected {
-  border-color: var(--secondary-blue);
-  background: rgba(59, 130, 246, 0.2);
-}
-
-.camera-icon {
-  font-size: 1.5rem;
-  margin-right: 0.75rem;
-  color: var(--white);
-  opacity: 0.8;
-  transition: all 0.3s ease;
-}
-
-.camera-option.selected .camera-icon {
-  color: var(--accent-gold);
-  opacity: 1;
-}
-
-.camera-info {
-  flex: 1;
-}
-
-.camera-name {
-  display: block;
-  font-weight: var(--font-weight-semibold);
-  color: var(--white);
-  font-size: 14px;
-  margin-bottom: 4px;
-}
-
-.camera-status {
-  display: block;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: var(--font-weight-medium);
-}
-
-.camera-radio {
-  margin-left: 0.5rem;
-}
-
-.camera-radio input[type="radio"] {
-  display: none;
-}
-
-.camera-radio label {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  display: block;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.3s ease;
-}
-
-.camera-radio label::after {
-  content: '';
-  width: 10px;
-  height: 10px;
-  background: var(--secondary-blue);
-  border-radius: 50%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  transition: transform 0.3s ease;
-}
-
-.camera-option:hover .camera-radio label {
-  border-color: var(--secondary-blue);
-}
-
-.camera-radio input[type="radio"]:checked + label {
-  border-color: var(--secondary-blue);
-  background: rgba(59, 130, 246, 0.1);
-}
-
-.camera-radio input[type="radio"]:checked + label::after {
-  transform: translate(-50%, -50%) scale(1);
-}
-
-/* Ocultar opciones de cámara no disponibles */
-.camera-option.hidden {
-  display: none !important;
-}
-
-/* Responsive para selector de cámara */
-@media (max-width: 768px) {
-  .camera-options {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  
-  .camera-option {
-    padding: 0.75rem;
-  }
-  
-  .camera-icon {
-    font-size: 1.25rem;
-    margin-right: 0.5rem;
-  }
-  
-  .camera-name {
-    font-size: 13px;
-  }
-  
-  .camera-status {
-    font-size: 0.7rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .camera-selector-section {
-    margin: 0.75rem 0;
-    padding: 0.75rem;
-  }
-  
-  .camera-selector-section h3 {
-    font-size: 14px;
-  }
-  
-  .camera-selector-section h3 i {
-    font-size: 16px;
-  }
-  
-  .camera-option {
-    padding: 0.5rem;
-  }
-  
-  .camera-icon {
-    font-size: 1rem;
-  }
-  
-  .camera-name {
-    font-size: 12px;
-  }
-  
-  .camera-status {
-    font-size: 0.65rem;
   }
 }
 }
