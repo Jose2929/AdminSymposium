@@ -29,6 +29,11 @@ class SimpleQRScanner {
         this.stream = null;
         this.scanInterval = null;
         
+        // Propiedades para manejo de múltiples cámaras
+        this.currentCameraIndex = 0;
+        this.availableCameras = [];
+        this.currentFacingMode = 'environment'; // 'user' para frontal, 'environment' para trasera
+        
         // Referencias a elementos DOM
         this.elements = {
             startBtn: document.getElementById('start-scanner-btn'),
@@ -43,8 +48,19 @@ class SimpleQRScanner {
             resultDetails: document.getElementById('result-details'),
             resultIcon: document.getElementById('result-icon'),
             clearResultBtn: document.getElementById('clear-result-btn'),
-            dismissErrorBtn: document.getElementById('dismiss-error-btn')
+            dismissErrorBtn: document.getElementById('dismiss-error-btn'),
+            // Nuevos elementos para cambio de cámara y entrada manual
+            cameraToggleBtn: document.getElementById('camera-toggle-btn'),
+            manualCodeInput: document.getElementById('manual-code-input'),
+            submitManualBtn: document.getElementById('submit-manual-btn'),
+            // Elementos para el toggle de modos
+            modeButtons: document.querySelectorAll('.mode-btn'),
+            manualMode: document.getElementById('manual-mode'),
+            scannerControls: document.querySelector('.scanner-controls')
         };
+        
+        // Estado del modo actual
+        this.currentMode = 'scanner';
         
         this.init();
     }
@@ -62,6 +78,10 @@ class SimpleQRScanner {
         }
         
         this.setupEventListeners();
+        
+        // Establecer modo inicial (escáner por defecto)
+        this.toggleScannerMode('scanner');
+        
         console.log('Escáner QR Simplificado inicializado correctamente');
     }
 
@@ -87,6 +107,40 @@ class SimpleQRScanner {
         
         // Botón de cerrar error
         this.elements.dismissErrorBtn?.addEventListener('click', () => this.hideError());
+        
+        // Nuevos event listeners para funcionalidades adicionales
+        this.elements.cameraToggleBtn?.addEventListener('click', () => this.toggleCamera());
+        this.elements.submitManualBtn?.addEventListener('click', () => this.processManualInput());
+        
+        // Event listeners para toggle de modos
+        this.elements.modeButtons?.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const mode = e.currentTarget.getAttribute('data-mode');
+                this.toggleScannerMode(mode);
+            });
+        });
+        
+        // Event listener para entrada manual con tecla Enter
+        this.elements.manualCodeInput?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.processManualInput();
+            }
+        });
+        
+        // Validación en tiempo real del campo de entrada manual
+        this.elements.manualCodeInput?.addEventListener('input', (e) => {
+            this.validateManualInput(e.target);
+        });
+        
+        // Evitar paste de caracteres no válidos
+        this.elements.manualCodeInput?.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            const validText = pastedText.replace(/[^0-9]/g, '').substring(0, 5);
+            e.target.value = validText;
+            this.validateManualInput(e.target);
+        });
         
         // Evento de tecla Escape para cerrar escáner
         document.addEventListener('keydown', (e) => {
@@ -114,13 +168,13 @@ class SimpleQRScanner {
             this.showCameraContainer();
             this.updateStartButton(false);
             
-            // Solicitar acceso a la cámara
+            // Obtener dispositivos de cámara disponibles
+            await this.loadAvailableCameras();
+            
+            // Solicitar acceso a la cámara usando dispositivo específico
+            const videoConstraints = await this.getCurrentVideoConstraints();
             this.stream = await navigator.mediaDevices.getUserMedia({
-                video: { 
-                    facingMode: 'environment', // Cámara trasera por defecto
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                }
+                video: videoConstraints
             });
             
             // Configurar video
@@ -440,6 +494,9 @@ class SimpleQRScanner {
     showCameraContainer() {
         if (this.elements.cameraContainer) {
             this.elements.cameraContainer.style.display = 'block';
+            
+            // Mostrar botón de cambio de cámara si hay múltiples dispositivos
+            this.updateCameraToggleButton();
         }
     }
 
@@ -490,6 +547,277 @@ class SimpleQRScanner {
             "'": '&#039;'
         };
         return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    // ========================================
+    // NUEVAS FUNCIONALIDADES PARA CÁMARA MÚLTIPLE Y ENTRADA MANUAL
+    // ========================================
+
+    /**
+     * Cargar dispositivos de cámara disponibles
+     */
+    async loadAvailableCameras() {
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            this.availableCameras = devices.filter(device => device.kind === 'videoinput');
+            console.log('Cámaras disponibles:', this.availableCameras);
+        } catch (error) {
+            console.warn('No se pudieron enumerar dispositivos de cámara:', error);
+            this.availableCameras = [];
+        }
+    }
+
+    /**
+     * Obtener constraints de video para la cámara actual
+     */
+    async getCurrentVideoConstraints() {
+        if (this.availableCameras.length > 0 && this.currentCameraIndex < this.availableCameras.length) {
+            // Usar dispositivo específico
+            return {
+                deviceId: { exact: this.availableCameras[this.currentCameraIndex].deviceId },
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            };
+        } else {
+            // Usar facingMode como fallback
+            return {
+                facingMode: this.currentFacingMode,
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            };
+        }
+    }
+
+    /**
+     * Actualizar botón de cambio de cámara
+     */
+    updateCameraToggleButton() {
+        if (!this.elements.cameraToggleBtn) return;
+        
+        const hasMultipleCameras = this.availableCameras.length > 1;
+        this.elements.cameraToggleBtn.style.display = hasMultipleCameras ? 'flex' : 'none';
+        
+        // Actualizar tooltip
+        if (hasMultipleCameras) {
+            const nextFacing = this.currentFacingMode === 'environment' ? 'frontal' : 'trasera';
+            this.elements.cameraToggleBtn.title = `Cambiar a cámara ${nextFacing}`;
+        }
+    }
+
+    /**
+     * Alternar entre cámaras frontal y trasera
+     */
+    async toggleCamera() {
+        if (!this.isScanning || this.availableCameras.length <= 1) return;
+        
+        console.log('Cambiando cámara...');
+        
+        try {
+            // Cambiar el facing mode
+            this.currentFacingMode = this.currentFacingMode === 'environment' ? 'user' : 'environment';
+            
+            // Actualizar estado del botón
+            this.elements.cameraToggleBtn.style.opacity = '0.6';
+            this.elements.cameraToggleBtn.style.pointerEvents = 'none';
+            this.updateScannerStatus('Cambiando cámara...');
+            
+            // Reiniciar cámara con nueva configuración
+            const currentData = null; // No guardamos datos del QR actual
+            
+            this.stopCamera();
+            await this.startCamera();
+            
+        } catch (error) {
+            console.error('Error al cambiar cámara:', error);
+            // Revertir cambio en caso de error
+            this.currentFacingMode = this.currentFacingMode === 'environment' ? 'user' : 'environment';
+            this.updateScannerStatus('Error al cambiar cámara');
+        } finally {
+            // Restaurar estado del botón
+            setTimeout(() => {
+                if (this.elements.cameraToggleBtn) {
+                    this.elements.cameraToggleBtn.style.opacity = '1';
+                    this.elements.cameraToggleBtn.style.pointerEvents = 'auto';
+                }
+            }, 500);
+        }
+    }
+
+    /**
+     * Procesar entrada manual de código
+     */
+    processManualInput() {
+        const input = this.elements.manualCodeInput;
+        const button = this.elements.submitManualBtn;
+        
+        if (!input || !button) return;
+        
+        const code = input.value.trim();
+        
+        if (code.length !== 5) {
+            // Mostrar mensaje de error visual
+            this.showInputError(input, 'El código debe tener exactamente 5 dígitos');
+            return;
+        }
+        
+        if (!/^\d{5}$/.test(code)) {
+            this.showInputError(input, 'Solo se permiten números');
+            return;
+        }
+        
+        // Deshabilitar botón y campo durante procesamiento
+        button.disabled = true;
+        input.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Procesando...</span>';
+        
+        console.log('Procesando código manual:', `AST-${code}`);
+        
+        // Simular procesamiento
+        setTimeout(() => {
+            // Mostrar resultado como si fuera escaneado (con prefijo AST-)
+            this.onQRCodeDetected(`AST-${code}`);
+            
+            // Limpiar campo
+            input.value = '';
+            
+            // Restaurar estado de controles
+            button.disabled = false;
+            input.disabled = false;
+            button.innerHTML = '<i class="fas fa-paper-plane"></i><span>Enviar</span>';
+            
+            // Volver al modo escáner
+            this.toggleScannerMode('scanner');
+            
+            // Restaurar estilos
+            input.style.borderColor = '';
+            input.style.animation = '';
+            
+        }, 1000);
+    }
+
+    /**
+     * Alternar entre modos escáner QR y entrada manual
+     */
+    toggleScannerMode(mode) {
+        if (this.currentMode === mode) return;
+        
+        console.log('Cambiando modo a:', mode);
+        
+        this.currentMode = mode;
+        
+        // Actualizar botones de toggle
+        this.elements.modeButtons?.forEach(btn => {
+            const btnMode = btn.getAttribute('data-mode');
+            if (btnMode === mode) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        // Mostrar/ocultar controles según el modo
+        if (mode === 'manual') {
+            // Detener escáner si está activo
+            if (this.isScanning) {
+                this.stopCamera();
+            }
+            
+            // Mostrar modo manual
+            this.elements.scannerControls?.setAttribute('style', 'display: none !important');
+            this.elements.manualMode?.setAttribute('style', 'display: block !important');
+            this.hideResultContainer();
+            this.hideError();
+            
+        } else {
+            // Mostrar modo escáner
+            this.elements.scannerControls?.setAttribute('style', 'display: flex !important');
+            this.elements.manualMode?.setAttribute('style', 'display: none !important');
+        }
+        
+        // Actualizar estado de botones
+        this.updateStartButton(true);
+        this.updateScannerStatus(mode === 'scanner' ? 'Listo para escanear' : 'Modo de entrada manual');
+    }
+
+    /**
+     * Validar entrada manual en tiempo real
+     */
+    validateManualInput(input) {
+        let value = input.value;
+        
+        // Remover cualquier carácter que no sea número
+        value = value.replace(/[^0-9]/g, '');
+        
+        // Limitar a 5 caracteres
+        if (value.length > 5) {
+            value = value.substring(0, 5);
+        }
+        
+        // Actualizar valor si se cambió
+        if (value !== input.value) {
+            input.value = value;
+        }
+        
+        // Validar longitud y mostrar feedback visual
+        if (value.length === 5) {
+            input.parentElement.style.borderColor = 'var(--success-green)';
+            input.parentElement.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
+        } else if (value.length > 0) {
+            input.parentElement.style.borderColor = 'var(--secondary-blue)';
+            input.parentElement.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.2)';
+        } else {
+            input.parentElement.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            input.parentElement.style.boxShadow = 'none';
+        }
+        
+        // Habilitar/deshabilitar botón de envío
+        if (this.elements.submitManualBtn) {
+            this.elements.submitManualBtn.disabled = value.length !== 5;
+        }
+    }
+
+    /**
+     * Mostrar error en el campo de entrada
+     */
+    showInputError(input, message) {
+        // Remover mensajes de error anteriores
+        const existingError = input.parentElement.querySelector('.input-error');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        // Mostrar error visual
+        input.parentElement.style.borderColor = '#ef4444';
+        input.parentElement.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.2)';
+        input.style.animation = 'shake 0.3s';
+        
+        // Agregar mensaje de error
+        const errorElement = document.createElement('div');
+        errorElement.className = 'input-error';
+        errorElement.textContent = message;
+        errorElement.style.cssText = `
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            text-align: center;
+            font-weight: 500;
+        `;
+        
+        input.parentElement.appendChild(errorElement);
+        
+        // Restaurar estilos después de la animación
+        setTimeout(() => {
+            input.style.animation = '';
+            input.parentElement.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            input.parentElement.style.boxShadow = 'none';
+            
+            // Remover mensaje de error después de un momento
+            setTimeout(() => {
+                if (errorElement.parentElement) {
+                    errorElement.remove();
+                }
+            }, 2000);
+        }, 300);
     }
 }
 
