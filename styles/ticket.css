@@ -3,7 +3,13 @@
   --badge-width: 380px;
   --badge-height: 640px;
   
-  /* Esquema de colores profesionales */
+  /* Esquema de colores guinda/rojo profesionales */
+  --primary-guinda: #800020;
+  --secondary-guinda: #B91C1C;
+  --accent-red: #DC2626;
+  --light-guinda: #E5B7C6;
+  --dark-guinda: #4A0E1E;
+  
   --primary-blue: #1e3a8a;
   --secondary-blue: #3b82f6;
   --light-blue: #dbeafe;
@@ -227,7 +233,7 @@ body {
   height: 40px;
   background: var(--white);
   border-radius: 50%;
-  border: 8px solid var(--light-gray);
+  border: 8px solid var(--light-guinda);
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -238,7 +244,7 @@ body {
 
 /* Header del ticket */
 .ticket-header {
-  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+  background: linear-gradient(135deg, var(--primary-guinda), var(--secondary-guinda));
   color: var(--white);
   padding: var(--padding-base);
   text-align: center;
@@ -305,7 +311,7 @@ body {
 
 .info-item i {
   width: 16px;
-  color: var(--secondary-blue);
+  color: var(--secondary-guinda);
   font-size: 12px;
 }
 
@@ -323,7 +329,7 @@ body {
   background: var(--light-gray);
   padding: 16px;
   border-radius: var(--border-radius-small);
-  border: 2px dashed var(--secondary-blue);
+  border: 2px dashed var(--secondary-guinda);
 }
 
 .qr-placeholder {
@@ -335,13 +341,13 @@ body {
   align-items: center;
   justify-content: center;
   margin-bottom: 8px;
-  border: 2px solid var(--secondary-blue);
+  border: 2px solid var(--secondary-guinda);
   box-shadow: var(--shadow-light);
 }
 
 .qr-placeholder i {
   font-size: 88px;
-  color: var(--secondary-blue);
+  color: var(--secondary-guinda);
 }
 
 .qr-container small {
@@ -360,7 +366,7 @@ body {
   display: flex;
   gap: 16px;
   align-items: center;
-  background: var(--light-blue);
+  background: var(--light-guinda);
   padding: 16px;
   border-radius: var(--border-radius-small);
   margin-bottom: 12px;
@@ -372,7 +378,7 @@ body {
 
 .participant-photo i {
   font-size: 48px;
-  color: var(--secondary-blue);
+  color: var(--secondary-guinda);
 }
 
 .participant-info {
@@ -382,7 +388,7 @@ body {
 .participant-name {
   font-size: 18px;
   font-weight: var(--font-weight-bold);
-  color: var(--primary-blue);
+  color: var(--primary-guinda);
   margin: 0 0 4px 0;
   line-height: 1.3;
 }
@@ -401,7 +407,7 @@ body {
 }
 
 .badge-professional {
-  background: linear-gradient(135deg, var(--success-green), #059669);
+  background: linear-gradient(135deg, var(--accent-red), var(--secondary-guinda));
   color: var(--white);
   padding: 4px 12px;
   border-radius: 20px;
@@ -440,6 +446,78 @@ body {
   font-weight: var(--font-weight-semibold);
 }
 
+/* Sección de conferenciantes */
+.speakers-section {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(128, 0, 32, 0.1);
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-guinda);
+  margin-left: var(--padding-base);
+  margin-right: var(--padding-base);
+}
+
+.speakers-section h3 {
+  color: var(--primary-guinda);
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.speakers-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.speaker-card {
+  background: white;
+  padding: 0.75rem;
+  border-radius: 6px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid var(--light-guinda);
+}
+
+.speaker-avatar {
+  font-size: 1.5rem;
+  color: var(--secondary-guinda);
+  margin-bottom: 0.5rem;
+}
+
+.speaker-info h4 {
+  font-size: 0.9rem;
+  color: var(--primary-guinda);
+  margin: 0.25rem 0;
+  font-weight: 600;
+}
+
+.speaker-info p {
+  font-size: 0.75rem;
+  color: #666;
+  margin: 0.25rem 0;
+}
+
+.speaker-info small {
+  font-size: 0.7rem;
+  color: var(--secondary-guinda);
+  font-weight: 500;
+}
+
+/* Responsive para conferenciantes */
+@media (max-width: 768px) {
+  .speakers-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .speaker-card {
+    padding: 0.5rem;
+  }
+}
+
 /* Sección de contacto */
 .contact-section {
   padding: 8px var(--padding-base);
@@ -467,7 +545,7 @@ body {
 }
 
 .contact-info i {
-  color: var(--secondary-blue);
+  color: var(--secondary-guinda);
   width: 12px;
   text-align: center;
 }
@@ -488,7 +566,7 @@ body {
 
 .ticket-number {
   font-size: 10px;
-  color: var(--secondary-blue);
+  color: var(--secondary-guinda);
   font-weight: var(--font-weight-semibold);
   font-family: 'Courier New', monospace;
 }
