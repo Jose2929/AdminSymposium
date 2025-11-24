@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Registro de Entrada - Educational Symposium 2025</title>
+  <link rel="stylesheet" href="../styles/ticket.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Header superior con botón de navegación -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="../index.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        <span>Atrás</span>
+      </a>
+      <h1 class="header-title">Registro de Entrada</h1>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <!-- Sección del Escáner QR -->
+    <section class="qr-scanner-section" id="qr-scanner-section">
+      <header class="scanner-header">
+        <h2><i class="fas fa-qrcode"></i> Escáner de Código QR</h2>
+        <p>Verifica la autenticidad de los gafetes del Educational Symposium 2025</p>
+      </header>
+
+      <div class="scanner-container">
+        <!-- Controles del escáner -->
+        <div class="scanner-controls">
+          <button class="btn btn-primary" id="start-scanner-btn">
+            <i class="fas fa-play"></i>
+            <span>Iniciar Escáner</span>
+          </button>
+          <button class="btn btn-secondary" id="stop-scanner-btn" disabled>
+            <i class="fas fa-stop"></i>
+            <span>Detener Escáner</span>
+          </button>
+        </div>
+
+        <!-- Área de la cámara -->
+        <div class="camera-container" id="camera-container" style="display: none;">
+          <div class="video-wrapper">
+            <video id="qr-video" autoplay muted playsinline></video>
+            <div class="qr-overlay">
+              <div class="qr-frame">
+                <div class="qr-corner qr-corner-top-left"></div>
+                <div class="qr-corner qr-corner-top-right"></div>
+                <div class="qr-corner qr-corner-bottom-left"></div>
+                <div class="qr-corner qr-corner-bottom-right"></div>
+                <div class="qr-center-line"></div>
+              </div>
+            </div>
+          </div>
+          <div class="scanner-status">
+            <i class="fas fa-camera"></i>
+            <span id="camera-status">Cámara activa - Apunta al código QR</span>
+          </div>
+        </div>
+
+        <!-- Área de resultado -->
+        <div class="scan-result-container" id="scan-result-container" style="display: none;">
+          <div class="result-card">
+            <div class="result-icon">
+              <i class="fas fa-check-circle" id="result-icon"></i>
+            </div>
+            <div class="result-content">
+              <h3 id="result-title">Código QR Detectado</h3>
+              <p id="result-message">El código ha sido leído exitosamente</p>
+              <div class="result-details" id="result-details"></div>
+            </div>
+            <button class="btn btn-outline" id="clear-result-btn">
+              <i class="fas fa-times"></i>
+              <span>Limpiar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mensajes de error -->
+        <div class="error-container" id="error-container" style="display: none;">
+          <div class="error-card">
+            <div class="error-icon">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="error-content">
+              <h3 id="error-title">Error del Sistema</h3>
+              <p id="error-message">No se pudo inicializar la cámara</p>
+            </div>
+            <button class="btn btn-outline" id="dismiss-error-btn">
+              <i class="fas fa-times"></i>
+              <span>Cerrar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Panel de resumen (se actualiza con los escaneos) -->
+    <section class="scan-summary" id="scan-summary" style="display: none;">
+      <div class="summary-card">
+        <div class="summary-header">
+          <h3><i class="fas fa-chart-bar"></i> Resumen de Verificaciones</h3>
+        </div>
+        <div class="summary-content">
+          <div class="summary-stats">
+            <div class="stat-item">
+              <span class="stat-value" id="total-scans">0</span>
+              <span class="stat-label">Total Escaneados</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="valid-scans">0</span>
+              <span class="stat-label">Válidos</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="invalid-scans">0</span>
+              <span class="stat-label">Inválidos</span>
+            </div>
+          </div>
+          <div class="recent-scans" id="recent-scans">
+            <!-- Lista de escaneos recientes se genera dinámicamente -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script src="../js/qr-scanner.js"></script>
+</body>
+</html>

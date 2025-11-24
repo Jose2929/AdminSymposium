@@ -1,0 +1,125 @@
+/* Reset y configuración básica */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Estilos para los botones personalizados */
+.btn-custom {
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón de Administración */
+.btn-administracion {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-administracion:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+/* Botón de Entrada */
+.btn-entrada {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.btn-entrada:hover {
+    background: linear-gradient(135deg, #e082eb 0%, #f0445a 100%);
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(240, 147, 251, 0.4);
+    color: white;
+}
+
+/* Grupo de botones responsivo */
+.button-group {
+    position: relative;
+    z-index: 100;
+}
+
+/* Efectos adicionales en dispositivos táctiles */
+@media (hover: none) and (pointer: coarse) {
+    .btn-custom:hover {
+        transform: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-custom:active {
+        transform: scale(0.98);
+    }
+}
+
+/* Ajustes para dispositivos móviles */
+@media (max-width: 768px) {
+    .btn-custom {
+        padding: 12px 25px;
+        font-size: 14px;
+        min-width: 120px;
+    }
+    
+    .button-group {
+        gap: 15px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .btn-custom {
+        padding: 10px 20px;
+        font-size: 13px;
+        min-width: 100px;
+    }
+    
+    .button-group {
+        gap: 12px !important;
+    }
+}
+
+/* Asegurar que los botones estén centrados y con espacio del borde */
+.container-fluid {
+    min-height: 100vh;
+}
+
+/* Animación sutil de entrada */
+.btn-custom {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Efectos de focus para accesibilidad */
+.btn-custom:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+}
+
+.btn-entrada:focus {
+    box-shadow: 0 0 0 3px rgba(240, 147, 251, 0.3);
+}
