@@ -1023,6 +1023,27 @@ body {
   color: var(--accent-gold);
 }
 
+/* Información de cámara */
+.camera-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--white);
+  border-radius: var(--border-radius-small);
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.camera-info i {
+  color: var(--success-green);
+  font-size: 11px;
+}
+
 /* Contenedor de resultado */
 .scan-result-container,
 .error-container {

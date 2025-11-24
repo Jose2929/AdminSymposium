@@ -29,15 +29,22 @@ class SimpleQRScanner {
         this.stream = null;
         this.scanInterval = null;
         
+        // Control de cámaras
+        this.currentCamera = 'environment'; // 'environment' (trasera) o 'user' (frontal)
+        this.availableCameras = [];
+        this.cameraDeviceId = null;
+        
         // Referencias a elementos DOM
         this.elements = {
             startBtn: document.getElementById('start-scanner-btn'),
             stopBtn: document.getElementById('stop-scanner-btn'),
+            switchCameraBtn: document.getElementById('switch-camera-btn'),
             cameraContainer: document.getElementById('camera-container'),
             scanResultContainer: document.getElementById('scan-result-container'),
             errorContainer: document.getElementById('error-container'),
             video: document.getElementById('qr-video'),
             cameraStatus: document.getElementById('camera-status'),
+            cameraInfo: document.getElementById('camera-info'),
             resultTitle: document.getElementById('result-title'),
             resultMessage: document.getElementById('result-message'),
             resultDetails: document.getElementById('result-details'),
@@ -73,6 +80,80 @@ class SimpleQRScanner {
     }
 
     /**
+     * Detectar dispositivos de cámara disponibles
+     */
+    async detectCameras() {
+        try {
+            // Obtener lista de dispositivos de cámara
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            this.availableCameras = devices.filter(device => device.kind === 'videoinput');
+            
+            console.log('Cámaras detectadas:', this.availableCameras.length);
+            this.availableCameras.forEach((camera, index) => {
+                console.log(`Cámara ${index + 1}: ${camera.label || 'Sin nombre'}`);
+            });
+            
+            return this.availableCameras;
+        } catch (error) {
+            console.warn('No se pudieron detectar las cámaras:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Obtener configuración de cámara optimizada para Android
+     */
+    getCameraConstraints() {
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        const constraints = {
+            video: {
+                facingMode: this.currentCamera,
+                width: { ideal: isAndroid ? 1280 : 1920 },
+                height: { ideal: isAndroid ? 720 : 1080 },
+                aspectRatio: { ideal: 16/9 }
+            },
+            audio: false
+        };
+
+        // Si tenemos un deviceId específico, usarlo
+        if (this.cameraDeviceId) {
+            constraints.video.deviceId = { exact: this.cameraDeviceId };
+        }
+
+        return constraints;
+    }
+
+    /**
+     * Cambiar entre cámara frontal y trasera
+     */
+    async switchCamera() {
+        if (!this.isScanning) {
+            this.showError('Error de Cámara', 'Debe estar escaneando para cambiar de cámara');
+            return;
+        }
+
+        try {
+            console.log('Cambiando cámara...');
+            this.updateScannerStatus('Cambiando cámara...');
+            
+            // Detener cámara actual
+            this.stopCamera();
+            
+            // Cambiar modo de cámara
+            this.currentCamera = this.currentCamera === 'environment' ? 'user' : 'environment';
+            
+            // Iniciar nueva cámara
+            setTimeout(() => {
+                this.startCamera();
+            }, 500); // Pequeña pausa para evitar conflictos
+            
+        } catch (error) {
+            console.error('Error al cambiar cámara:', error);
+            this.handleCameraError(error);
+        }
+    }
+
+    /**
      * Configurar event listeners
      */
     setupEventListeners() {
@@ -81,6 +162,9 @@ class SimpleQRScanner {
         
         // Botón de detener
         this.elements.stopBtn?.addEventListener('click', () => this.stopCamera());
+        
+        // Botón de cambio de cámara
+        this.elements.switchCameraBtn?.addEventListener('click', () => this.switchCamera());
         
         // Botón de limpiar resultado
         this.elements.clearResultBtn?.addEventListener('click', () => this.clearResult());
@@ -114,27 +198,28 @@ class SimpleQRScanner {
             this.showCameraContainer();
             this.updateStartButton(false);
             
+            // Detectar cámaras disponibles
+            await this.detectCameras();
+            
+            // Obtener configuración optimizada
+            const constraints = this.getCameraConstraints();
+            
             // Solicitar acceso a la cámara
-            this.stream = await navigator.mediaDevices.getUserMedia({
-                video: { 
-                    facingMode: 'environment', // Cámara trasera por defecto
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                }
-            });
+            this.stream = await navigator.mediaDevices.getUserMedia(constraints);
             
             // Configurar video
             this.video = this.elements.video;
             this.video.srcObject = this.stream;
             
             // Esperar a que el video esté listo
-            await new Promise((resolve) => {
+            await new Promise((resolve, reject) => {
                 this.video.onloadedmetadata = resolve;
+                this.video.onerror = reject;
             });
             
             // Crear canvas para procesar imagen
             this.canvas = document.createElement('canvas');
-            this.canvasContext = this.canvas.getContext('2d');
+            this.canvasContext = this.canvas.getContext('2d', { willReadFrequently: true });
             
             // Configurar dimensiones del canvas
             this.canvas.width = this.video.videoWidth;
@@ -142,6 +227,8 @@ class SimpleQRScanner {
             
             this.isScanning = true;
             this.updateStartButton(true);
+            this.updateCameraButton();
+            this.updateCameraInfo();
             this.updateScannerStatus('Cámara activa - Apunta al código QR');
             
             // Iniciar escaneo continuo
@@ -265,6 +352,7 @@ class SimpleQRScanner {
         
         this.hideCameraContainer();
         this.updateStartButton(true);
+        this.updateCameraButton();
         this.updateScannerStatus('Escáner detenido');
         
         console.log('Cámara detenida');
@@ -374,37 +462,126 @@ class SimpleQRScanner {
     }
 
     /**
-     * Manejar errores de cámara
+     * Manejar errores de cámara con soporte específico para Android
      */
     handleCameraError(error) {
         console.error('Error de cámara:', error);
         
         let title = 'Error del Sistema';
         let message = 'Ocurrió un error inesperado';
+        let suggestions = [];
+        
+        // Detectar si es Android
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        const isMobile = /Mobile|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
         
         switch (error.name) {
             case 'NotAllowedError':
                 title = 'Permisos Denegados';
-                message = 'Se requieren permisos de cámara para usar el escáner QR. Por favor, permite el acceso a la cámara.';
+                message = 'Se requieren permisos de cámara para usar el escáner QR.';
+                suggestions = [
+                    'Haz clic en el ícono de cámara en la barra de direcciones',
+                    'Selecciona "Permitir" para la cámara',
+                    'Recarga la página después de otorgar permisos'
+                ];
+                if (isMobile) {
+                    suggestions.push('En Android: Configuración > Aplicaciones > Navegador > Permisos > Cámara');
+                }
                 break;
+                
             case 'NotFoundError':
                 title = 'Cámara No Disponible';
-                message = 'No se encontró ninguna cámara en el dispositivo';
+                message = 'No se encontró ninguna cámara en el dispositivo.';
+                if (isMobile) {
+                    suggestions = [
+                        'Verifica que el dispositivo tenga cámara',
+                        'Cierra otras aplicaciones que puedan estar usando la cámara',
+                        'Reinicia la aplicación del navegador'
+                    ];
+                } else {
+                    suggestions = [
+                        'Conecta una cámara USB si usas computadora de escritorio',
+                        'Verifica que la cámara esté funcionando en otras aplicaciones'
+                    ];
+                }
                 break;
+                
             case 'NotReadableError':
                 title = 'Cámara Ocupada';
-                message = 'La cámara está siendo usada por otra aplicación. Cierra otras aplicaciones que puedan estar usando la cámara.';
+                message = 'La cámara está siendo usada por otra aplicación.';
+                suggestions = [
+                    'Cierra WhatsApp, Telegram u otras apps de video llamada',
+                    'Cierra otras pestañas del navegador que usen cámara',
+                    'Reinicia el navegador',
+                    'Reinicia el dispositivo si el problema persiste'
+                ];
                 break;
+                
             case 'OverconstrainedError':
                 title = 'Configuración de Cámara';
-                message = 'La cámara no soporta la configuración requerida';
+                message = 'La cámara no soporta la resolución requerida.';
+                suggestions = [
+                    'Intenta con resolución más baja',
+                    'Usa la cámara trasera para mejor calidad',
+                    'Cierra otras aplicaciones que consuman recursos'
+                ];
                 break;
+                
+            case 'NotSupportedError':
+                title = 'Navegador No Compatible';
+                message = 'Tu navegador no soporta el acceso a la cámara.';
+                suggestions = [
+                    'Usa Chrome, Firefox o Safari actualizados',
+                    'En Android usa Chrome o Firefox',
+                    'En iOS usa Safari o Chrome'
+                ];
+                break;
+                
+            case 'AbortError':
+                title = 'Operación Cancelada';
+                message = 'El acceso a la cámara fue cancelado.';
+                suggestions = [
+                    'Intenta nuevamente',
+                    'Verifica que no haya ventanas de confirmación bloqueadas'
+                ];
+                break;
+                
             default:
-                message = error.message || message;
+                title = 'Error de Cámara';
+                message = `Error desconocido: ${error.message || error.name}`;
+                suggestions = [
+                    'Recarga la página',
+                    'Reinicia el navegador',
+                    'Verifica que la cámara funcione en otras aplicaciones'
+                ];
         }
         
-        this.showError(title, message);
+        // Agregar información específica de Android
+        if (isAndroid) {
+            message += ' [Android detectado]';
+        } else if (isMobile && !isAndroid) {
+            message += ' [Dispositivo móvil detectado]';
+        }
+        
+        // Crear mensaje con sugerencias
+        let fullMessage = message;
+        if (suggestions.length > 0) {
+            fullMessage += '\n\nSoluciones sugeridas:\n• ' + suggestions.join('\n• ');
+        }
+        
+        this.showError(title, fullMessage);
         this.stopCamera();
+        
+        // Log adicional para debugging
+        console.log('Contexto del error:', {
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            deviceMemory: navigator.deviceMemory,
+            connectionType: navigator.connection?.effectiveType,
+            isAndroid,
+            isMobile,
+            error: error
+        });
     }
 
     /**
@@ -413,6 +590,41 @@ class SimpleQRScanner {
     updateScannerStatus(message) {
         if (this.elements.cameraStatus) {
             this.elements.cameraStatus.textContent = message;
+        }
+    }
+
+    /**
+     * Actualizar botón de cambio de cámara
+     */
+    updateCameraButton() {
+        if (this.elements.switchCameraBtn) {
+            const isFrontCamera = this.currentCamera === 'user';
+            const icon = isFrontCamera ? 'fa-camera' : 'fa-camera-retro';
+            const text = isFrontCamera ? 'Frontal' : 'Trasera';
+            
+            this.elements.switchCameraBtn.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <span>Cambiar a ${text}</span>
+            `;
+            
+            // Mostrar/ocultar botón según disponibilidad de cámaras
+            this.elements.switchCameraBtn.style.display = 
+                this.availableCameras.length > 1 ? 'flex' : 'none';
+        }
+    }
+
+    /**
+     * Actualizar información de cámara
+     */
+    updateCameraInfo() {
+        if (this.elements.cameraInfo) {
+            const cameraType = this.currentCamera === 'environment' ? 'Trasera' : 'Frontal';
+            const cameraCount = this.availableCameras.length;
+            
+            this.elements.cameraInfo.innerHTML = `
+                <i class="fas fa-info-circle"></i>
+                <span>Cámara: ${cameraType} (${cameraCount} disponible${cameraCount !== 1 ? 's' : ''})</span>
+            `;
         }
     }
 
@@ -467,7 +679,30 @@ class SimpleQRScanner {
     showError(title, message) {
         if (this.elements.errorContainer) {
             document.getElementById('error-title').textContent = title;
-            document.getElementById('error-message').textContent = message;
+            
+            // Manejar saltos de línea en el mensaje
+            const messageElement = document.getElementById('error-message');
+            const lines = message.split('\n');
+            messageElement.innerHTML = '';
+            
+            lines.forEach((line, index) => {
+                if (line.trim()) {
+                    const p = document.createElement('p');
+                    if (line.startsWith('• ')) {
+                        p.innerHTML = `<strong>${line}</strong>`;
+                        p.style.marginBottom = '4px';
+                    } else if (line.includes('Soluciones sugeridas:')) {
+                        p.innerHTML = `<strong>${line}</strong>`;
+                        p.style.marginBottom = '8px';
+                        p.style.marginTop = '8px';
+                    } else {
+                        p.textContent = line;
+                        if (index > 0) p.style.marginBottom = '4px';
+                    }
+                    messageElement.appendChild(p);
+                }
+            });
+            
             this.elements.errorContainer.style.display = 'block';
         }
     }
