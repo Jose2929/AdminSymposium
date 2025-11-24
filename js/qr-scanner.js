@@ -1,72 +1,35 @@
 /**
- * Escáner de Códigos QR para Registro de Entrada - Educational Symposium 2025
- * Funcionalidad completa para verificación y autenticación de gafetes
+ * Escáner QR Simplificado con jsQR
+ * Educational Symposium 2025
+ * 
+ * FUNCIONALIDAD SIMPLIFICADA:
+ * - Solo escanear códigos QR
+ * - Mostrar el contenido leído
+ * - Preparar para acción posterior del usuario
+ * - Redirección configurable
  */
 
-// Configuración global
-const QRScannerConfig = {
-    // URL de la librería QR Scanner (desde CDN)
-    libraryUrl: 'https://unpkg.com/qr-scanner@1.4.2/qr-scanner.min.js',
-    
-    // Configuración de cámara
-    cameraConstraints: {
-        video: {
-            facingMode: { exact: "environment" }, // Cámara trasera por defecto
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-        }
-    },
-    
-    // Tiempos de configuración
-    timeouts: {
-        scannerStart: 10000,
-        cameraAccess: 5000
-    },
+// ========================================
+// CONFIGURACIÓN
+// ========================================
 
-    // Configuración para check-in
-    checkIn: {
-        validEventPrefix: 'EDU2025-', // Prefijo válido para el evento
-        maxRecentScans: 10, // Máximo de escaneos recientes a mostrar
-        autoHideResult: true, // Auto-ocultar resultado después de 5 segundos
-        autoHideDelay: 5000
-    }
-};
+// URL para redirección (CONFIGURABLE POR EL USUARIO)
+const REDIRECT_URL = 'index.html'; // Cambia esta URL según necesites
 
-// Verificación de navegador para soporte de cámara
-const browserSupport = {
-    hasGetUserMedia: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
-    hasWebRTC: !!(window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection),
-    hasWorkerSupport: typeof Worker !== 'undefined'
-};
+// ========================================
+// CLASE PRINCIPAL DEL ESCÁNER
+// ========================================
 
-/**
- * Clase principal del Escáner QR
- */
-class QRCodeScanner {
+class SimpleQRScanner {
     constructor() {
         this.isScanning = false;
-        this.scanner = null;
         this.video = null;
-        this.currentCameraStream = null;
+        this.canvas = null;
+        this.canvasContext = null;
+        this.stream = null;
+        this.scanInterval = null;
         
-        // Estadísticas de check-in
-        this.scanStats = {
-            total: 0,
-            valid: 0,
-            invalid: 0,
-            recentScans: []
-        };
-        
-        // Referencias a elementos DOM para estadísticas
-        this.summaryElements = {
-            scanSummary: document.getElementById('scan-summary'),
-            totalScans: document.getElementById('total-scans'),
-            validScans: document.getElementById('valid-scans'),
-            invalidScans: document.getElementById('invalid-scans'),
-            recentScans: document.getElementById('recent-scans')
-        };
-        
-        // Referencias a elementos DOM del escáner
+        // Referencias a elementos DOM
         this.elements = {
             startBtn: document.getElementById('start-scanner-btn'),
             stopBtn: document.getElementById('stop-scanner-btn'),
@@ -90,32 +53,23 @@ class QRCodeScanner {
      * Inicializar el escáner
      */
     init() {
-        console.log('Inicializando Escáner QR...');
+        console.log('Inicializando Escáner QR Simplificado...');
         
+        // Verificar soporte del navegador
         if (!this.checkBrowserSupport()) {
             this.showError('Navegador no compatible', 'Tu navegador no soporta las funciones necesarias para el escáner QR.');
             return;
         }
         
         this.setupEventListeners();
-        console.log('Escáner QR inicializado correctamente');
+        console.log('Escáner QR Simplificado inicializado correctamente');
     }
 
     /**
      * Verificar soporte del navegador
      */
     checkBrowserSupport() {
-        if (!browserSupport.hasGetUserMedia) {
-            console.error('getUserMedia no está soportado');
-            return false;
-        }
-        
-        if (!browserSupport.hasWorkerSupport) {
-            console.error('Workers no están soportados');
-            return false;
-        }
-        
-        return true;
+        return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
     }
 
     /**
@@ -123,10 +77,10 @@ class QRCodeScanner {
      */
     setupEventListeners() {
         // Botón de inicio
-        this.elements.startBtn?.addEventListener('click', () => this.startScanner());
+        this.elements.startBtn?.addEventListener('click', () => this.startCamera());
         
         // Botón de detener
-        this.elements.stopBtn?.addEventListener('click', () => this.stopScanner());
+        this.elements.stopBtn?.addEventListener('click', () => this.stopCamera());
         
         // Botón de limpiar resultado
         this.elements.clearResultBtn?.addEventListener('click', () => this.clearResult());
@@ -137,504 +91,183 @@ class QRCodeScanner {
         // Evento de tecla Escape para cerrar escáner
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.isScanning) {
-                this.stopScanner();
+                this.stopCamera();
             }
         });
         
         // Eventos de visibilidad de página
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && this.isScanning) {
-                this.stopScanner();
+                this.stopCamera();
             }
         });
     }
 
     /**
-     * Iniciar el escáner QR
+     * Iniciar cámara
      */
-    async startScanner() {
-        console.log('Iniciando escáner QR...');
+    async startCamera() {
+        console.log('Iniciando cámara...');
         
         try {
-            this.updateScannerStatus('Iniciando cámara...');
+            this.updateScannerStatus('Solicitando permisos de cámara...');
             this.showCameraContainer();
             this.updateStartButton(false);
             
-            // Cargar la librería QR Scanner dinámicamente
-            await this.loadQRLibrary();
+            // Solicitar acceso a la cámara
+            this.stream = await navigator.mediaDevices.getUserMedia({
+                video: { 
+                    facingMode: 'environment', // Cámara trasera por defecto
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            });
             
-            // Inicializar el escáner
-            await this.initializeScanner();
+            // Configurar video
+            this.video = this.elements.video;
+            this.video.srcObject = this.stream;
+            
+            // Esperar a que el video esté listo
+            await new Promise((resolve) => {
+                this.video.onloadedmetadata = resolve;
+            });
+            
+            // Crear canvas para procesar imagen
+            this.canvas = document.createElement('canvas');
+            this.canvasContext = this.canvas.getContext('2d');
+            
+            // Configurar dimensiones del canvas
+            this.canvas.width = this.video.videoWidth;
+            this.canvas.height = this.video.videoHeight;
             
             this.isScanning = true;
             this.updateStartButton(true);
             this.updateScannerStatus('Cámara activa - Apunta al código QR');
             
-            console.log('Escáner QR iniciado correctamente');
+            // Iniciar escaneo continuo
+            this.startScanning();
+            
+            console.log('Cámara iniciada correctamente');
             
         } catch (error) {
-            console.error('Error al iniciar escáner:', error);
-            this.handleScannerError(error);
+            console.error('Error al iniciar cámara:', error);
+            this.handleCameraError(error);
         }
     }
 
     /**
-     * Cargar la librería QR Scanner desde CDN
+     * Iniciar escaneo continuo
      */
-    async loadQRLibrary() {
-        return new Promise((resolve, reject) => {
-            if (window.QrScanner) {
-                resolve();
-                return;
-            }
-            
-            const script = document.createElement('script');
-            script.src = QRScannerConfig.libraryUrl;
-            script.onload = () => {
-                console.log('Librería QR Scanner cargada');
-                resolve();
-            };
-            script.onerror = () => {
-                reject(new Error('No se pudo cargar la librería QR Scanner'));
-            };
-            
-            document.head.appendChild(script);
-        });
-    }
-
-    /**
-     * Inicializar el escáner QR
-     */
-    async initializeScanner() {
-        if (!window.QrScanner) {
-            throw new Error('Librería QR Scanner no está disponible');
-        }
+    startScanning() {
+        console.log('Iniciando escaneo QR...');
         
-        // Configurar worker para QR Scanner
-        if (typeof window.QrScanner !== 'undefined' && window.QrScanner.WORKER_PATH) {
-            // La librería qr-scanner puede usar worker si está configurado
-            window.QrScanner.WORKER_PATH = QRScannerConfig.libraryUrl.replace('.min.js', '.worker.min.js');
-        }
-        
-        // Crear instancia del escáner con configuración
-        try {
-            // Verificar disponibilidad de cámara primero
-            await this.checkCameraAvailability();
+        this.scanInterval = setInterval(() => {
+            if (!this.isScanning) return;
             
-            // Crear instancia del escáner
-            this.scanner = new window.QrScanner(
-                this.elements.video,
-                (result) => this.onQRCodeDetected(result),
-                {
-                    onDecodeError: (error) => this.onScannerError(error),
-                    maxScansPerSecond: 5, // Limitar scans para mejor rendimiento
-                    highlightScanRegion: false,
-                    highlightCodeOutline: false,
-                    preferredCamera: 'environment' // Cámara trasera por defecto
+            try {
+                // Dibujar frame actual del video en el canvas
+                this.canvasContext.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+                
+                // Obtener datos de imagen
+                const imageData = this.canvasContext.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Usar jsQR para escanear
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                
+                if (code) {
+                    console.log('Código QR detectado:', code.data);
+                    this.onQRCodeDetected(code.data);
                 }
-            );
-            
-            // Iniciar escaneo
-            await this.scanner.start();
-            
-        } catch (error) {
-            console.error('Error al inicializar QR Scanner:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Verificar disponibilidad de cámara
-     */
-    async checkCameraAvailability() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: false
-            });
-            
-            // Detener el stream de prueba
-            stream.getTracks().forEach(track => track.stop());
-            
-            return true;
-        } catch (error) {
-            throw new Error('Cámara no disponible: ' + error.message);
-        }
+                
+            } catch (error) {
+                console.warn('Error durante escaneo:', error);
+            }
+        }, 100); // Escanear cada 100ms
     }
 
     /**
      * Manejar detección de código QR
      */
-    onQRCodeDetected(result) {
-        console.log('Código QR detectado:', result);
+    onQRCodeDetected(data) {
+        console.log('Código QR detectado:', data);
         
-        if (this.isScanning) {
-            this.stopScanner();
-            this.processQRCode(result);
-        }
+        if (!this.isScanning) return;
+        
+        // Detener escáner
+        this.stopCamera();
+        
+        // Mostrar resultado
+        this.showResult(data);
+        
+        // Ejecutar acción posterior del usuario
+        this.executeCustomAction(data);
     }
 
     /**
-     * Manejar errores del escáner
+     * Mostrar resultado del escaneo
      */
-    onScannerError(error) {
-        console.warn('Error del escáner:', error);
+    showResult(qrData) {
+        // Actualizar interfaz
+        this.elements.resultTitle.textContent = '✅ Código QR Detectado';
+        this.elements.resultMessage.textContent = 'El código ha sido leído exitosamente';
         
-        // Solo mostrar errores críticos
-        if (error.name === 'NotAllowedError' || error.name === 'NotFoundError') {
-            this.handleScannerError(error);
-        }
-    }
-
-    /**
-     * Procesar el código QR leído (Versión mejorada para check-in)
-     */
-    processQRCode(result) {
-        const qrData = result.data || result;
-        console.log('Procesando código QR para check-in:', qrData);
-        
-        this.scanStats.total++;
-        
-        try {
-            // Intentar parsear como JSON
-            const parsedData = JSON.parse(qrData);
-            const validation = this.validateQRCode(parsedData);
-            
-            if (validation.isValid) {
-                this.scanStats.valid++;
-                this.playSuccessSound();
-                this.addToRecentScans({
-                    ...parsedData,
-                    timestamp: new Date().toISOString(),
-                    status: 'valid'
-                });
-                
-                this.displayResult('success', '✅ Gafete Válido', 'Verificación exitosa del gafete', parsedData);
-            } else {
-                this.scanStats.invalid++;
-                this.playErrorSound();
-                this.addToRecentScans({
-                    ...parsedData,
-                    timestamp: new Date().toISOString(),
-                    status: 'invalid',
-                    reason: validation.reason
-                });
-                
-                this.displayResult('error', '❌ Gafete Inválido', validation.reason, parsedData);
-            }
-            
-        } catch (e) {
-            // Si no es JSON, validar como texto plano
-            const validation = this.validateQRCodeText(qrData);
-            
-            if (validation.isValid) {
-                this.scanStats.valid++;
-                this.playSuccessSound();
-                this.addToRecentScans({
-                    contenido: qrData,
-                    timestamp: new Date().toISOString(),
-                    status: 'valid'
-                });
-                
-                this.displayResult('success', '✅ Código Válido', 'Verificación exitosa', {
-                    contenido: qrData,
-                    tipo: 'texto_plano'
-                });
-            } else {
-                this.scanStats.invalid++;
-                this.playErrorSound();
-                this.addToRecentScans({
-                    contenido: qrData,
-                    timestamp: new Date().toISOString(),
-                    status: 'invalid',
-                    reason: validation.reason
-                });
-                
-                this.displayResult('error', '❌ Código Inválido', validation.reason, {
-                    contenido: qrData
-                });
-            }
-        }
-        
-        this.updateScanStats();
-    }
-
-    /**
-     * Validar código QR específico para el evento
-     */
-    validateQRCode(data) {
-        // Validar estructura JSON
-        if (!data || typeof data !== 'object') {
-            return { isValid: false, reason: 'Formato de datos inválido' };
-        }
-
-        // Validar campos requeridos para el evento
-        const requiredFields = ['evento', 'participante', 'codigo'];
-        for (const field of requiredFields) {
-            if (!data[field]) {
-                return { isValid: false, reason: `Campo requerido faltante: ${field}` };
-            }
-        }
-
-        // Validar que sea del evento correcto
-        if (!data.evento.includes('Educational Symposium 2025')) {
-            return { isValid: false, reason: 'Gafete de evento diferente' };
-        }
-
-        // Validar formato del código
-        if (!data.codigo.startsWith(QRScannerConfig.checkIn.validEventPrefix)) {
-            return { isValid: false, reason: 'Código de evento inválido' };
-        }
-
-        // Validar fecha del evento (opcional)
-        if (data.fecha) {
-            const eventDate = new Date(data.fecha);
-            const today = new Date();
-            const eventDateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
-            const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-            
-            if (eventDateOnly > todayOnly) {
-                return { isValid: false, reason: 'Gafete de evento futuro' };
-            }
-        }
-
-        return { isValid: true };
-    }
-
-    /**
-     * Validar código QR como texto plano
-     */
-    validateQRCodeText(text) {
-        // Validar que contenga el prefijo válido
-        if (!text.startsWith(QRScannerConfig.checkIn.validEventPrefix)) {
-            return { isValid: false, reason: 'Código no válido para este evento' };
-        }
-
-        // Validar longitud mínima
-        if (text.length < 8) {
-            return { isValid: false, reason: 'Código muy corto' };
-        }
-
-        // Validar que contenga números
-        if (!/\d/.test(text)) {
-            return { isValid: false, reason: 'Código debe contener números' };
-        }
-
-        return { isValid: true };
-    }
-
-    /**
-     * Agregar escaneo al historial reciente
-     */
-    addToRecentScans(scanData) {
-        this.scanStats.recentScans.unshift(scanData);
-        
-        // Mantener solo los últimos escaneos
-        if (this.scanStats.recentScans.length > QRScannerConfig.checkIn.maxRecentScans) {
-            this.scanStats.recentScans = this.scanStats.recentScans.slice(0, QRScannerConfig.checkIn.maxRecentScans);
-        }
-    }
-
-    /**
-     * Actualizar estadísticas mostradas
-     */
-    updateScanStats() {
-        if (this.summaryElements.totalScans) {
-            this.summaryElements.totalScans.textContent = this.scanStats.total;
-        }
-        if (this.summaryElements.validScans) {
-            this.summaryElements.validScans.textContent = this.scanStats.valid;
-        }
-        if (this.summaryElements.invalidScans) {
-            this.summaryElements.invalidScans.textContent = this.scanStats.invalid;
-        }
-        
-        // Mostrar resumen si hay al menos un escaneo
-        if (this.scanStats.total > 0 && this.summaryElements.scanSummary) {
-            this.summaryElements.scanSummary.style.display = 'block';
-        }
-        
-        this.updateRecentScansList();
-    }
-
-    /**
-     * Actualizar lista de escaneos recientes
-     */
-    updateRecentScansList() {
-        if (!this.summaryElements.recentScans) return;
-        
-        const recentScans = this.scanStats.recentScans.slice(0, 5); // Mostrar solo los últimos 5
-        let html = '<div class="recent-scans-list">';
-        
-        recentScans.forEach((scan, index) => {
-            const time = new Date(scan.timestamp).toLocaleTimeString();
-            const statusClass = scan.status === 'valid' ? 'valid' : 'invalid';
-            const statusIcon = scan.status === 'valid' ? '✅' : '❌';
-            
-            html += `
-                <div class="recent-scan-item ${statusClass}">
-                    <span class="scan-status">${statusIcon}</span>
-                    <span class="scan-info">${scan.participante || scan.contenido?.substring(0, 20) || 'Código desconocido'}</span>
-                    <span class="scan-time">${time}</span>
+        // Mostrar contenido del QR
+        this.elements.resultDetails.innerHTML = `
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-key">Contenido:</span>
+                    <span class="detail-value">${this.escapeHtml(qrData)}</span>
                 </div>
-            `;
-        });
+                <div class="detail-item">
+                    <span class="detail-key">Fecha:</span>
+                    <span class="detail-value">${new Date().toLocaleString('es-ES')}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-key">Longitud:</span>
+                    <span class="detail-value">${qrData.length} caracteres</span>
+                </div>
+            </div>
+        `;
         
-        html += '</div>';
-        this.summaryElements.recentScans.innerHTML = html;
-    }
-
-    /**
-     * Reproducir sonido de éxito
-     */
-    playSuccessSound() {
-        try {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-            oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.3);
-        } catch (error) {
-            console.warn('No se pudo reproducir sonido de éxito:', error);
-        }
-    }
-
-    /**
-     * Reproducir sonido de error
-     */
-    playErrorSound() {
-        try {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
-            oscillator.frequency.setValueAtTime(300, audioContext.currentTime + 0.1);
-            oscillator.frequency.setValueAtTime(200, audioContext.currentTime + 0.2);
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.4);
-        } catch (error) {
-            console.warn('No se pudo reproducir sonido de error:', error);
-        }
-    }
-
-    /**
-     * Mostrar resultado del escaneo (Versión mejorada para check-in)
-     */
-    displayResult(type, title, message, details) {
-        const iconMap = {
-            success: { icon: 'fas fa-check-circle', class: 'success' },
-            info: { icon: 'fas fa-info-circle', class: 'info' },
-            error: { icon: 'fas fa-times-circle', class: 'error' }
-        };
+        // Cambiar icono a éxito
+        this.elements.resultIcon.className = 'fas fa-check-circle';
         
-        const config = iconMap[type] || iconMap.info;
-        
-        // Actualizar icono y clase
-        this.elements.resultIcon.className = config.icon;
-        this.elements.resultTitle.textContent = title;
-        this.elements.resultMessage.textContent = message;
-        
-        // Mostrar detalles
-        this.elements.resultDetails.innerHTML = this.formatDetails(details);
-        
-        // Mostrar contenedor
+        // Mostrar contenedor de resultado
         this.showResultContainer();
         this.hideCameraContainer();
         this.updateStartButton(true);
-        
-        // Auto-ocultar resultado después de un tiempo para check-in
-        if (QRScannerConfig.checkIn.autoHideResult && type === 'success') {
-            setTimeout(() => {
-                this.hideResultContainer();
-            }, QRScannerConfig.checkIn.autoHideDelay);
-        }
     }
 
     /**
-     * Formatear detalles para mostrar
+     * Detener cámara
      */
-    formatDetails(details) {
-        let html = '<div class="details-grid">';
+    stopCamera() {
+        console.log('Deteniendo cámara...');
         
-        Object.entries(details).forEach(([key, value]) => {
-            const formattedKey = this.formatKey(key);
-            const formattedValue = this.formatValue(value);
-            
-            html += `
-                <div class="detail-item">
-                    <span class="detail-key">${formattedKey}:</span>
-                    <span class="detail-value">${formattedValue}</span>
-                </div>
-            `;
-        });
+        this.isScanning = false;
         
-        html += '</div>';
-        return html;
-    }
-
-    /**
-     * Formatear clave para mostrar
-     */
-    formatKey(key) {
-        return key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
-    }
-
-    /**
-     * Formatear valor para mostrar
-     */
-    formatValue(value) {
-        if (typeof value === 'string' && value.length > 50) {
-            return value.substring(0, 50) + '...';
-        }
-        return value;
-    }
-
-    /**
-     * Detener el escáner
-     */
-    async stopScanner() {
-        console.log('Deteniendo escáner QR...');
-        
-        if (this.scanner) {
-            try {
-                await this.scanner.stop();
-                this.scanner.destroy();
-                this.scanner = null;
-            } catch (error) {
-                console.warn('Error al detener escáner:', error);
-            }
+        // Limpiar interval de escaneo
+        if (this.scanInterval) {
+            clearInterval(this.scanInterval);
+            this.scanInterval = null;
         }
         
         // Detener stream de cámara
-        if (this.currentCameraStream) {
-            this.currentCameraStream.getTracks().forEach(track => track.stop());
-            this.currentCameraStream = null;
+        if (this.stream) {
+            this.stream.getTracks().forEach(track => track.stop());
+            this.stream = null;
         }
         
-        this.isScanning = false;
+        // Limpiar video
+        if (this.video) {
+            this.video.srcObject = null;
+        }
+        
         this.hideCameraContainer();
         this.updateStartButton(true);
         this.updateScannerStatus('Escáner detenido');
         
-        console.log('Escáner QR detenido');
+        console.log('Cámara detenida');
     }
 
     /**
@@ -646,10 +279,105 @@ class QRCodeScanner {
     }
 
     /**
-     * Manejar errores del escáner
+     * Ejecutar acción posterior del usuario
+     * 
+     * IMPORTANTE: El usuario puede definir aquí su lógica personalizada
      */
-    handleScannerError(error) {
-        console.error('Error del escáner:', error);
+    executeCustomAction(qrData) {
+        console.log('Ejecutando acción personalizada con datos:', qrData);
+        
+        // ========================================
+        // SECCIÓN PERSONALIZABLE POR EL USUARIO
+        // ========================================
+        
+        // Ejemplo 1: Log en consola (ya está funcionando)
+        console.log('QR Data procesada:', qrData);
+        
+        // Ejemplo 2: Validar si es JSON y procesarlo
+        try {
+            const jsonData = JSON.parse(qrData);
+            console.log('Datos JSON válidos:', jsonData);
+            // Aquí puedes agregar tu lógica para datos JSON
+        } catch (e) {
+            console.log('Datos de texto plano:', qrData);
+            // Aquí puedes agregar tu lógica para texto plano
+        }
+        
+        // Ejemplo 3: Guardar en localStorage
+        try {
+            localStorage.setItem('ultimo_qr_scanneado', qrData);
+            localStorage.setItem('ultimo_qr_timestamp', new Date().toISOString());
+        } catch (e) {
+            console.warn('No se pudo guardar en localStorage:', e);
+        }
+        
+        // Ejemplo 4: Enviar a servidor (descomenta y configura según necesites)
+        /*
+        this.sendToServer(qrData);
+        */
+        
+        // Ejemplo 5: Redirección simple (ya está configurada abajo)
+        this.redirectToPage(qrData);
+        
+        // ========================================
+        // FIN DE SECCIÓN PERSONALIZABLE
+        // ========================================
+    }
+
+    /**
+     * Enviar datos al servidor
+     * 
+     * DESCOMENTA Y CONFIGURA ESTA FUNCIÓN SI NECESITAS ENVIAR DATOS AL SERVIDOR
+     */
+    /*
+    async sendToServer(qrData) {
+        try {
+            const response = await fetch('/api/qr-scan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    data: qrData,
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent
+                })
+            });
+            
+            if (response.ok) {
+                console.log('Datos enviados al servidor exitosamente');
+            } else {
+                console.error('Error al enviar datos al servidor:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error de red al enviar datos:', error);
+        }
+    }
+    */
+
+    /**
+     * Redirección simple
+     * 
+     * REDIRECCIONA A LA PÁGINA CONFIGURADA EN REDIRECT_URL
+     */
+    redirectToPage(qrData) {
+        console.log(`Redirigiendo a: ${REDIRECT_URL}`);
+        
+        // Ejemplo de cómo pasar datos por URL si es necesario
+        const url = new URL(window.location.origin + '/' + REDIRECT_URL);
+        // url.searchParams.set('qr_data', encodeURIComponent(qrData)); // Descomenta si necesitas pasar datos
+        
+        // Redirección simple
+        setTimeout(() => {
+            window.location.href = url.toString();
+        }, 2000); // Esperar 2 segundos para mostrar el resultado
+    }
+
+    /**
+     * Manejar errores de cámara
+     */
+    handleCameraError(error) {
+        console.error('Error de cámara:', error);
         
         let title = 'Error del Sistema';
         let message = 'Ocurrió un error inesperado';
@@ -657,7 +385,7 @@ class QRCodeScanner {
         switch (error.name) {
             case 'NotAllowedError':
                 title = 'Permisos Denegados';
-                message = 'Se requieren permisos de cámara para usar el escáner QR';
+                message = 'Se requieren permisos de cámara para usar el escáner QR. Por favor, permite el acceso a la cámara.';
                 break;
             case 'NotFoundError':
                 title = 'Cámara No Disponible';
@@ -665,7 +393,7 @@ class QRCodeScanner {
                 break;
             case 'NotReadableError':
                 title = 'Cámara Ocupada';
-                message = 'La cámara está siendo usada por otra aplicación';
+                message = 'La cámara está siendo usada por otra aplicación. Cierra otras aplicaciones que puedan estar usando la cámara.';
                 break;
             case 'OverconstrainedError':
                 title = 'Configuración de Cámara';
@@ -676,7 +404,7 @@ class QRCodeScanner {
         }
         
         this.showError(title, message);
-        this.stopScanner();
+        this.stopCamera();
     }
 
     /**
@@ -707,7 +435,7 @@ class QRCodeScanner {
     }
 
     /**
-     * Mostrar/ocultar contenedor de cámara
+     * Mostrar/ocultar contenedores
      */
     showCameraContainer() {
         if (this.elements.cameraContainer) {
@@ -721,9 +449,6 @@ class QRCodeScanner {
         }
     }
 
-    /**
-     * Mostrar/ocultar contenedor de resultado
-     */
     showResultContainer() {
         if (this.elements.scanResultContainer) {
             this.elements.scanResultContainer.style.display = 'block';
@@ -737,7 +462,7 @@ class QRCodeScanner {
     }
 
     /**
-     * Mostrar/ocultar contenedor de error
+     * Mostrar/ocultar error
      */
     showError(title, message) {
         if (this.elements.errorContainer) {
@@ -752,21 +477,96 @@ class QRCodeScanner {
             this.elements.errorContainer.style.display = 'none';
         }
     }
+
+    /**
+     * Escapar HTML para prevenir XSS
+     */
+    escapeHtml(text) {
+        const map = {
+            '&': '&',
+            '<': '<',
+            '>': '>',
+            '"': '"',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
 }
 
-// Inicializar escáner cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Educational Symposium 2025 - QR Scanner iniciado');
+// ========================================
+// CARGAR jsQR DESDE CDN
+// ========================================
+
+/**
+ * Cargar librería jsQR desde CDN
+ */
+function loadJsQR() {
+    return new Promise((resolve, reject) => {
+        if (window.jsQR) {
+            resolve();
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+        script.onload = () => {
+            console.log('jsQR cargado exitosamente');
+            resolve();
+        };
+        script.onerror = () => {
+            reject(new Error('No se pudo cargar jsQR desde CDN'));
+        };
+        
+        document.head.appendChild(script);
+    });
+}
+
+// ========================================
+// INICIALIZACIÓN
+// ========================================
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('Educational Symposium 2025 - Escáner QR Simplificado iniciado');
     
-    // Crear instancia global del escáner
-    window.qrScanner = new QRCodeScanner();
+    try {
+        // Cargar jsQR
+        await loadJsQR();
+        
+        // Crear instancia global del escáner
+        window.simpleQRScanner = new SimpleQRScanner();
+        
+    } catch (error) {
+        console.error('Error al inicializar escáner:', error);
+        // Mostrar error al usuario si es necesario
+        const errorContainer = document.getElementById('error-container');
+        if (errorContainer) {
+            document.getElementById('error-title').textContent = 'Error de Librería';
+            document.getElementById('error-message').textContent = 'No se pudo cargar la librería necesaria para el escáner QR.';
+            errorContainer.style.display = 'block';
+        }
+    }
 });
 
-// Manejo de errores globales
-window.addEventListener('error', (event) => {
-    console.error('Error global:', event.error);
-});
+// ========================================
+// CONFIGURACIÓN RÁPIDA PARA EL USUARIO
+// ========================================
 
-window.addEventListener('unhandledrejection', (event) => {
-    console.error('Promise rechazada:', event.reason);
-});
+/**
+ * GUÍA RÁPIDA PARA PERSONALIZAR:
+ * 
+ * 1. CAMBIAR URL DE REDIRECCIÓN:
+ *    Modifica la variable REDIRECT_URL al inicio de este archivo
+ * 
+ * 2. PERSONALIZAR ACCIÓN POSTERIOR:
+ *    Modifica la función executeCustomAction() para agregar tu lógica
+ * 
+ * 3. ENVIAR DATOS AL SERVIDOR:
+ *    Descomenta y configura la función sendToServer()
+ * 
+ * 4. VALIDACIONES PERSONALIZADAS:
+ *    Agrega validaciones en executeCustomAction() según tus necesidades
+ * 
+ * 5. PROCESAMIENTO DE DATOS:
+ *    Personaliza cómo procesas los datos del QR según tu caso de uso
+ */

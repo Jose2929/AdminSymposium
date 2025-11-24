@@ -3,19 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AdminSymposium</title>
+    <title>AdminSymposium - Educational Symposium 2025</title>
     <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="styles/custom.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .main-title {
+            color: white;
+            font-weight: 300;
+            font-size: 3rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .button-container {
+            margin-top: 1rem;
+        }
+        
+        .btn-custom {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            border: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-administracion {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            color: white;
+        }
+        
+        .btn-entrada {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+        }
+        
+        .icon-margin {
+            margin-right: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 2.5rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+                margin-bottom: 2rem;
+            }
+            
+            .btn-custom {
+                padding: 10px 25px;
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container-fluid h-100">
         <div class="row h-100">
-            <div class="col-12 d-flex align-items-end justify-content-center pb-5">
-                <div class="button-group d-flex flex-column flex-md-row gap-3 gap-md-4">
-                    <button onclick="window.location.href='pages/ticket-design.html'" class="btn btn-custom btn-administracion" type="button">Crear Entrada</button>
-                    <button onclick="window.location.href='pages/check-in.html'" class="btn btn-custom btn-entrada" type="button">Asistencia</button>
+            <!-- Título centrado en la parte superior -->
+            <div class="col-12 d-flex flex-column justify-content-center align-items-center pt-5">
+                <h1 class="main-title">
+                    <i class="fas fa-graduation-cap icon-margin"></i>
+                    Educational Symposium 2025
+                </h1>
+                <p class="subtitle">Sistema de Administración de Eventos Educativos</p>
+                
+                <!-- Botones más arriba -->
+                <div class="button-container d-flex flex-column flex-md-row gap-3 gap-md-4">
+                    <button onclick="window.location.href='pages/ticket-design.html'" class="btn btn-custom btn-administracion" type="button">
+                        <i class="fas fa-ticket-alt icon-margin"></i>
+                        Crear Entrada
+                    </button>
+                    <button onclick="window.location.href='pages/check-in.html'" class="btn btn-custom btn-entrada" type="button">
+                        <i class="fas fa-qrcode icon-margin"></i>
+                        Asistencia
+                    </button>
                 </div>
             </div>
         </div>

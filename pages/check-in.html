@@ -15,17 +15,18 @@
         <i class="fas fa-arrow-left"></i>
         <span>Atrás</span>
       </a>
-      <h1 class="header-title">Registro de Entrada</h1>
+      <h1 class="header-title">Escáner QR</h1>
     </div>
   </header>
 
   <main class="page">
+    
 
     <!-- Sección del Escáner QR -->
     <section class="qr-scanner-section" id="qr-scanner-section">
       <header class="scanner-header">
         <h2><i class="fas fa-qrcode"></i> Escáner de Código QR</h2>
-        <p>Verifica la autenticidad de los gafetes del Educational Symposium 2025</p>
+        <p>Escanea cualquier código QR para ver su contenido de forma simple y rápida</p>
       </header>
 
       <div class="scanner-container">
@@ -34,10 +35,6 @@
           <button class="btn btn-primary" id="start-scanner-btn">
             <i class="fas fa-play"></i>
             <span>Iniciar Escáner</span>
-          </button>
-          <button class="btn btn-secondary" id="stop-scanner-btn" disabled>
-            <i class="fas fa-stop"></i>
-            <span>Detener Escáner</span>
           </button>
         </div>
 
@@ -98,34 +95,6 @@
       </div>
     </section>
 
-
-    <!-- Panel de resumen (se actualiza con los escaneos) -->
-    <section class="scan-summary" id="scan-summary" style="display: none;">
-      <div class="summary-card">
-        <div class="summary-header">
-          <h3><i class="fas fa-chart-bar"></i> Resumen de Verificaciones</h3>
-        </div>
-        <div class="summary-content">
-          <div class="summary-stats">
-            <div class="stat-item">
-              <span class="stat-value" id="total-scans">0</span>
-              <span class="stat-label">Total Escaneados</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value" id="valid-scans">0</span>
-              <span class="stat-label">Válidos</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value" id="invalid-scans">0</span>
-              <span class="stat-label">Inválidos</span>
-            </div>
-          </div>
-          <div class="recent-scans" id="recent-scans">
-            <!-- Lista de escaneos recientes se genera dinámicamente -->
-          </div>
-        </div>
-      </div>
-    </section>
   </main>
 
   <!-- Scripts -->
