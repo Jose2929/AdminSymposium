@@ -21,17 +21,6 @@
 
   <main class="page">
     
-    <!-- Toggle para alternar entre modos - REPOSICIONADO ARRIBA Y CENTRADO -->
-    <div class="scanner-mode-toggle">
-      <button class="mode-btn active" data-mode="scanner">
-        <i class="fas fa-qrcode"></i>
-        <span>Escáner QR</span>
-      </button>
-      <button class="mode-btn" data-mode="manual">
-        <i class="fas fa-keyboard"></i>
-        <span>Entrada Manual</span>
-      </button>
-    </div>
 
     <!-- Sección del Escáner QR -->
     <section class="qr-scanner-section" id="qr-scanner-section">
@@ -62,11 +51,6 @@
                 <div class="qr-center-line"></div>
               </div>
             </div>
-            
-            <!-- Botón discreto para cambio de cámara -->
-            <button class="camera-toggle-btn" id="camera-toggle-btn" title="Cambiar Cámara" aria-label="Cambiar entre cámara frontal y trasera">
-              <i class="fas fa-sync-alt"></i>
-            </button>
           </div>
           <div class="scanner-status">
             <i class="fas fa-camera"></i>
@@ -105,34 +89,6 @@
             <button class="btn btn-outline" id="dismiss-error-btn">
               <i class="fas fa-times"></i>
               <span>Cerrar</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Contenido de entrada manual (solo se muestra en modo manual) -->
-        <div class="manual-mode" id="manual-mode" style="display: none;">
-          <header class="manual-entry-header">
-            <h3><i class="fas fa-keyboard"></i> Entrada Manual</h3>
-            <p>Ingresa los 5 dígitos del código AST</p>
-          </header>
-          
-          <div class="manual-entry-container">
-            <label class="manual-label">
-              <span class="prefix">AST-</span>
-              <input 
-                type="text" 
-                id="manual-code-input" 
-                maxlength="5"
-                inputmode="numeric"
-                pattern="[0-9]*"
-                placeholder="12345"
-                class="manual-code-input"
-                aria-label="Campo para ingresar código manualmente"
-              />
-            </label>
-            <button class="btn btn-secondary" id="submit-manual-btn">
-              <i class="fas fa-paper-plane"></i>
-              <span>Enviar</span>
             </button>
           </div>
         </div>
