@@ -34,6 +34,9 @@ class SimpleQRScanner {
         this.availableCameras = [];
         this.currentFacingMode = 'environment'; // 'user' para frontal, 'environment' para trasera
         
+        // Nueva propiedad para el selector de cámara
+        this.selectedCamera = 'environment'; // Por defecto cámara trasera
+        
         // Referencias a elementos DOM
         this.elements = {
             startBtn: document.getElementById('start-scanner-btn'),
@@ -56,7 +59,14 @@ class SimpleQRScanner {
             // Elementos para el toggle de modos
             modeButtons: document.querySelectorAll('.mode-btn'),
             manualMode: document.getElementById('manual-mode'),
-            scannerControls: document.querySelector('.scanner-controls')
+            scannerControls: document.querySelector('.scanner-controls'),
+            // Elementos para títulos dinámicos
+            headerTitleText: document.getElementById('header-title-text'),
+            scannerTitleText: document.getElementById('scanner-title-text'),
+            // Nuevos elementos para el selector de cámara
+            cameraSelector: document.querySelector('.camera-selector-section'),
+            cameraOptions: document.querySelectorAll('.camera-option'),
+            cameraRadios: document.querySelectorAll('input[name="camera-selection"]')
         };
         
         // Estado del modo actual
@@ -68,7 +78,7 @@ class SimpleQRScanner {
     /**
      * Inicializar el escáner
      */
-    init() {
+    async init() {
         console.log('Inicializando Escáner QR Simplificado...');
         
         // Verificar soporte del navegador
@@ -78,6 +88,9 @@ class SimpleQRScanner {
         }
         
         this.setupEventListeners();
+        
+        // Detectar cámaras disponibles al inicializar
+        await this.initializeCameraDetection();
         
         // Establecer modo inicial (escáner por defecto)
         this.toggleScannerMode('scanner');
@@ -96,8 +109,8 @@ class SimpleQRScanner {
      * Configurar event listeners
      */
     setupEventListeners() {
-        // Botón de inicio
-        this.elements.startBtn?.addEventListener('click', () => this.startCamera());
+        // Botón de inicio - usar nueva función con selección de cámara
+        this.elements.startBtn?.addEventListener('click', () => this.startCameraWithSelection());
         
         // Botón de detener
         this.elements.stopBtn?.addEventListener('click', () => this.stopCamera());
@@ -111,6 +124,23 @@ class SimpleQRScanner {
         // Nuevos event listeners para funcionalidades adicionales
         this.elements.cameraToggleBtn?.addEventListener('click', () => this.toggleCamera());
         this.elements.submitManualBtn?.addEventListener('click', () => this.processManualInput());
+        
+        // Event listeners para selector de cámara
+        this.elements.cameraOptions?.forEach(option => {
+            option.addEventListener('click', (e) => {
+                const cameraType = option.getAttribute('data-camera');
+                this.selectCamera(cameraType);
+            });
+        });
+        
+        // Event listeners para radios de cámara
+        this.elements.cameraRadios?.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    this.selectCamera(e.target.value);
+                }
+            });
+        });
         
         // Event listeners para toggle de modos
         this.elements.modeButtons?.forEach(button => {
@@ -595,12 +625,19 @@ class SimpleQRScanner {
         if (!this.elements.cameraToggleBtn) return;
         
         const hasMultipleCameras = this.availableCameras.length > 1;
-        this.elements.cameraToggleBtn.style.display = hasMultipleCameras ? 'flex' : 'none';
         
-        // Actualizar tooltip
+        // Usar clase CSS para mostrar/ocultar
         if (hasMultipleCameras) {
+            this.elements.cameraToggleBtn.classList.remove('hidden');
+            this.elements.cameraToggleBtn.style.display = 'flex';
+            
+            // Actualizar tooltip
             const nextFacing = this.currentFacingMode === 'environment' ? 'frontal' : 'trasera';
             this.elements.cameraToggleBtn.title = `Cambiar a cámara ${nextFacing}`;
+            this.elements.cameraToggleBtn.ariaLabel = `Cambiar a cámara ${nextFacing}`;
+        } else {
+            this.elements.cameraToggleBtn.classList.add('hidden');
+            this.elements.cameraToggleBtn.style.display = 'none';
         }
     }
 
@@ -705,6 +742,9 @@ class SimpleQRScanner {
         
         this.currentMode = mode;
         
+        // Actualizar títulos dinámicamente
+        this.updateModeTitle(mode);
+        
         // Actualizar botones de toggle
         this.elements.modeButtons?.forEach(btn => {
             const btnMode = btn.getAttribute('data-mode');
@@ -728,10 +768,23 @@ class SimpleQRScanner {
             this.hideResultContainer();
             this.hideError();
             
+            // Ocultar botón de cambio de cámara en modo manual
+            if (this.elements.cameraToggleBtn) {
+                this.elements.cameraToggleBtn.classList.add('hidden');
+            }
+            
         } else {
             // Mostrar modo escáner
             this.elements.scannerControls?.setAttribute('style', 'display: flex !important');
             this.elements.manualMode?.setAttribute('style', 'display: none !important');
+            
+            // Mostrar botón de cambio de cámara si hay múltiples cámaras
+            this.updateCameraToggleButton();
+            
+            // Re-aplicar selección de cámara (mantener persistencia)
+            if (this.selectedCamera) {
+                this.selectCamera(this.selectedCamera);
+            }
         }
         
         // Actualizar estado de botones
@@ -777,6 +830,21 @@ class SimpleQRScanner {
     }
 
     /**
+     * Actualizar títulos dinámicamente según el modo
+     */
+    updateModeTitle(mode) {
+        if (!this.elements.headerTitleText || !this.elements.scannerTitleText) return;
+        
+        const scannerTitle = mode === 'scanner' ? 'Escáner de Código QR' : 'Entrada Manual de Código';
+        const headerTitle = mode === 'scanner' ? 'Escáner de Código QR' : 'Entrada Manual';
+        
+        this.elements.headerTitleText.textContent = headerTitle;
+        this.elements.scannerTitleText.textContent = scannerTitle;
+        
+        console.log('Títulos actualizados para modo:', mode);
+    }
+
+    /**
      * Mostrar error en el campo de entrada
      */
     showInputError(input, message) {
@@ -818,6 +886,234 @@ class SimpleQRScanner {
                 }
             }, 2000);
         }, 300);
+    }
+
+    // ========================================
+    // NUEVAS FUNCIONES PARA SELECTOR DE CÁMARA
+    // ========================================
+
+    /**
+     * Inicializar detección de cámaras disponibles
+     */
+    async initializeCameraDetection() {
+        try {
+            console.log('Inicializando detección de cámaras...');
+            
+            // Primero solicitar permisos para poder detectar las cámaras
+            await navigator.mediaDevices.getUserMedia({ video: true });
+            
+            // Enumerar dispositivos
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            this.availableCameras = devices.filter(device => device.kind === 'videoinput');
+            
+            console.log('Cámaras detectadas:', this.availableCameras);
+            
+            // Actualizar selector según cámaras disponibles
+            this.updateCameraSelector();
+            
+            // Detener el stream temporal usado para permisos
+            const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            tempStream.getTracks().forEach(track => track.stop());
+            
+        } catch (error) {
+            console.warn('No se pudieron detectar cámaras automáticamente:', error);
+            // Usar predeterminadas en caso de error
+            this.updateCameraSelector();
+        }
+    }
+
+    /**
+     * Detectar cámaras disponibles
+     */
+    async detectAvailableCameras() {
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            
+            return videoDevices.map(device => ({
+                deviceId: device.deviceId,
+                label: device.label || 'Cámara sin nombre',
+                facing: device.label.toLowerCase().includes('back') || 
+                        device.label.toLowerCase().includes('rear') ? 'environment' : 'user'
+            }));
+        } catch (error) {
+            console.log('Error detectando cámaras:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Actualizar selector según cámaras disponibles
+     */
+    updateCameraSelector() {
+        const rearOption = document.querySelector('[data-camera="environment"]');
+        const frontOption = document.querySelector('[data-camera="user"]');
+        
+        if (!rearOption || !frontOption) return;
+        
+        // Determinar qué cámaras están disponibles
+        const hasRear = this.availableCameras.some(camera => 
+            !camera.label || 
+            camera.label.toLowerCase().includes('back') || 
+            camera.label.toLowerCase().includes('rear') ||
+            camera.label.toLowerCase().includes('environment')
+        );
+        
+        const hasFront = this.availableCameras.some(camera => 
+            camera.label && 
+            (camera.label.toLowerCase().includes('front') || 
+             camera.label.toLowerCase().includes('user'))
+        );
+        
+        // Mostrar/ocultar opciones según disponibilidad
+        if (hasRear) {
+            rearOption.classList.remove('hidden');
+            rearOption.style.display = 'flex';
+        } else {
+            rearOption.classList.add('hidden');
+            rearOption.style.display = 'none';
+        }
+        
+        if (hasFront) {
+            frontOption.classList.remove('hidden');
+            frontOption.style.display = 'flex';
+        } else {
+            frontOption.classList.add('hidden');
+            frontOption.style.display = 'none';
+        }
+        
+        // Auto-seleccionar primera opción disponible
+        if (hasRear) {
+            this.selectCamera('environment');
+        } else if (hasFront) {
+            this.selectCamera('user');
+        }
+        
+        console.log('Selector actualizado:', { hasRear, hasFront, selected: this.selectedCamera });
+    }
+
+    /**
+     * Seleccionar cámara específica
+     */
+    selectCamera(cameraType) {
+        console.log('Seleccionando cámara:', cameraType);
+        
+        this.selectedCamera = cameraType;
+        this.currentFacingMode = cameraType;
+        
+        // Actualizar estado visual de las opciones
+        this.elements.cameraOptions?.forEach(option => {
+            const optionCamera = option.getAttribute('data-camera');
+            if (optionCamera === cameraType) {
+                option.classList.add('selected');
+            } else {
+                option.classList.remove('selected');
+            }
+        });
+        
+        // Actualizar radio buttons
+        this.elements.cameraRadios?.forEach(radio => {
+            if (radio.value === cameraType) {
+                radio.checked = true;
+            } else {
+                radio.checked = false;
+            }
+        });
+        
+        console.log('Cámara seleccionada:', { cameraType, selectedCamera: this.selectedCamera });
+    }
+
+    /**
+     * Obtener cámara seleccionada
+     */
+    getSelectedCamera() {
+        return this.selectedCamera || 'environment';
+    }
+
+    /**
+     * Iniciar cámara con selección específica
+     */
+    async startCameraWithSelection() {
+        console.log('Iniciando cámara con selección:', this.getSelectedCamera());
+        
+        try {
+            this.updateScannerStatus('Solicitando permisos de cámara...');
+            this.showCameraContainer();
+            this.updateStartButton(false);
+            
+            // Obtener dispositivos de cámara disponibles
+            await this.loadAvailableCameras();
+            
+            // Usar la cámara seleccionada en las constraints
+            const videoConstraints = this.getSelectedVideoConstraints();
+            this.stream = await navigator.mediaDevices.getUserMedia({
+                video: videoConstraints
+            });
+            
+            // Configurar video
+            this.video = this.elements.video;
+            this.video.srcObject = this.stream;
+            
+            // Esperar a que el video esté listo
+            await new Promise((resolve) => {
+                this.video.onloadedmetadata = resolve;
+            });
+            
+            // Crear canvas para procesar imagen
+            this.canvas = document.createElement('canvas');
+            this.canvasContext = this.canvas.getContext('2d');
+            
+            // Configurar dimensiones del canvas
+            this.canvas.width = this.video.videoWidth;
+            this.canvas.height = this.video.videoHeight;
+            
+            this.isScanning = true;
+            this.updateStartButton(true);
+            this.updateScannerStatus('Cámara activa - Apunta al código QR');
+            
+            // Iniciar escaneo continuo
+            this.startScanning();
+            
+            console.log('Cámara iniciada correctamente con selección:', this.getSelectedCamera());
+            
+        } catch (error) {
+            console.error('Error al iniciar cámara:', error);
+            this.handleCameraError(error);
+        }
+    }
+
+    /**
+     * Obtener constraints de video para la cámara seleccionada
+     */
+    getSelectedVideoConstraints() {
+        const selectedCamera = this.getSelectedCamera();
+        
+        // Usar dispositivo específico si está disponible
+        if (this.availableCameras.length > 0) {
+            const targetCamera = this.availableCameras.find(camera => {
+                const label = camera.label.toLowerCase();
+                if (selectedCamera === 'environment') {
+                    return label.includes('back') || label.includes('rear') || label.includes('environment');
+                } else {
+                    return label.includes('front') || label.includes('user');
+                }
+            });
+            
+            if (targetCamera) {
+                return {
+                    deviceId: { exact: targetCamera.deviceId },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                };
+            }
+        }
+        
+        // Usar facingMode como fallback
+        return {
+            facingMode: selectedCamera,
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+        };
     }
 }
 
@@ -863,6 +1159,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Crear instancia global del escáner
         window.simpleQRScanner = new SimpleQRScanner();
+        
+        // Inicializar con await para el detector de cámaras
+        await window.simpleQRScanner.init();
         
     } catch (error) {
         console.error('Error al inicializar escáner:', error);

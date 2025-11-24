@@ -15,7 +15,10 @@
         <i class="fas fa-arrow-left"></i>
         <span>Atrás</span>
       </a>
-      <h1 class="header-title">Escáner QR</h1>
+      <h1 class="header-title" id="main-header-title">
+        <i class="fas fa-qrcode"></i> 
+        <span id="header-title-text">Escáner de Código QR</span>
+      </h1>
     </div>
   </header>
 
@@ -36,11 +39,45 @@
     <!-- Sección del Escáner QR -->
     <section class="qr-scanner-section" id="qr-scanner-section">
       <header class="scanner-header">
-        <h2><i class="fas fa-qrcode"></i> Escáner de Código QR</h2>
+        <h2><i class="fas fa-qrcode"></i> <span id="scanner-title-text">Escáner de Código QR</span></h2>
         <p>Escanea cualquier código QR para ver su contenido de forma simple y rápida</p>
       </header>
 
       <div class="scanner-container">
+        <!-- Selector de Cámara -->
+        <div class="camera-selector-section">
+          <h3><i class="fas fa-video"></i> Seleccionar Cámara</h3>
+          <div class="camera-options">
+            <div class="camera-option" data-camera="environment">
+              <div class="camera-icon">
+                <i class="fas fa-camera"></i>
+              </div>
+              <div class="camera-info">
+                <span class="camera-name">Cámara Trasera</span>
+                <small class="camera-status">Recomendada para escaneo</small>
+              </div>
+              <div class="camera-radio">
+                <input type="radio" name="camera-selection" value="environment" id="rear-camera" checked>
+                <label for="rear-camera"></label>
+              </div>
+            </div>
+            
+            <div class="camera-option" data-camera="user">
+              <div class="camera-icon">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="camera-info">
+                <span class="camera-name">Cámara Frontal</span>
+                <small class="camera-status">Para selfie y video llamadas</small>
+              </div>
+              <div class="camera-radio">
+                <input type="radio" name="camera-selection" value="user" id="front-camera">
+                <label for="front-camera"></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Controles del escáner -->
         <div class="scanner-controls">
           <button class="btn btn-primary" id="start-scanner-btn">
