@@ -607,9 +607,10 @@ class SimpleQRScanner {
                 <span>Cambiar a ${text}</span>
             `;
             
-            // Mostrar/ocultar botón según disponibilidad de cámaras
-            this.elements.switchCameraBtn.style.display = 
-                this.availableCameras.length > 1 ? 'flex' : 'none';
+            // Mostrar botón si hay cámaras disponibles O si ya estamos escaneando
+            // Esto asegura que el botón aparezca inmediatamente cuando se inicia el scanner
+            const shouldShowButton = this.availableCameras.length > 1 || this.isScanning;
+            this.elements.switchCameraBtn.style.display = shouldShowButton ? 'flex' : 'none';
         }
     }
 
