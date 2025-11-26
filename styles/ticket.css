@@ -449,12 +449,25 @@ body {
 /* Sección de conferenciantes */
 .speakers-section {
   margin: 1rem 0;
-  padding: 1rem;
-  background: rgba(128, 0, 32, 0.1);
-  border-radius: 8px;
-  border-left: 4px solid var(--primary-guinda);
+  padding: 1.5rem;
+  padding-top: 0;
+  background: linear-gradient(135deg, rgba(128, 0, 32, 0.08) 0%, rgba(185, 28, 28, 0.05) 100%);
+  border-radius: 16px;
+  border: 2px solid rgba(128, 0, 32, 0.15);
   margin-left: var(--padding-base);
   margin-right: var(--padding-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.speakers-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--primary-guinda), var(--secondary-guinda), var(--accent-red));
 }
 
 .speakers-section h3 {
@@ -473,37 +486,113 @@ body {
 }
 
 .speaker-card {
-  background: white;
-  padding: 0.75rem;
-  border-radius: 6px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  border: 1px solid var(--light-guinda);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  padding: 1rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 8px rgba(128, 0, 32, 0.1);
+  border: 1px solid rgba(128, 0, 32, 0.2);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.speaker-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-guinda), var(--secondary-guinda));
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+
+
+
+.speaker-card:nth-child(odd) {
+  
+  justify-content: flex-start;
+}
+
+.speaker-card:nth-child(odd) .speaker-info {
+  text-align: left;
+}
+
+.speaker-card:nth-child(even) {
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.speaker-card:nth-child(even) .speaker-info {
+  text-align: right;
 }
 
 .speaker-avatar {
-  font-size: 1.5rem;
-  color: var(--secondary-guinda);
-  margin-bottom: 0.5rem;
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  position: relative;
 }
 
+.speaker-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(128, 0, 32, 0.2);
+  transition: all 0.3s ease;
+}
+
+
+
 .speaker-info h4 {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: var(--primary-guinda);
   margin: 0.25rem 0;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.speaker-info h4::before {
+  content: '👤';
+  font-size: 1.2rem;
 }
 
 .speaker-info p {
-  font-size: 0.75rem;
-  color: #666;
+  font-size: 0.8rem;
+  color: var(--elegant-gray);
   margin: 0.25rem 0;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.speaker-info p::before {
+  content: '🏛️';
+  font-size: 0.9rem;
 }
 
 .speaker-info small {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--secondary-guinda);
-  font-weight: 500;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.speaker-info small::before {
+  content: '🎓';
+  font-size: 0.8rem;
 }
 
 /* Responsive para conferenciantes */

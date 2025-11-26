@@ -1,35 +1,35 @@
 {
-  "evento": [
-    null,
-    {
-      "fecha": "12/07/2023",
-      "nombre": "Evento 1"
-    },
-    {
-      "fecha": "12/02/2023",
-      "nombre": "Evento2"
-    },
-    {
-      "fecha": "01/01/1999",
-      "nombre": "Evento 3"
+  "evento": {
+    "-Of-fYpnR7RzMCgMP-a9": {
+      "fecha": "26/11/2025",
+      "nombre": "Congreso de estudiantes para validar un nuevo estudio"
     }
-  ],
+  },
   "info": {
     "correo": "correo@correo.com",
-    "descripcion": "descripcion",
+    "descripcion": "Descripcion del evento principal",
     "escuela": "Nombre escuela",
-    "fecha": "12222-12-12",
+    "fecha": "12/12/2023",
+    "horario": "12:00 - 13:00",
     "lugar": "Descripcion lugar",
     "ponente1": "p1",
     "ponente2": "p2",
     "ponente3": "p3",
     "telefono": "123456",
-    "titulo": "Congreso de educacion"
+    "titulo": "Congreso de educación"
   },
   "participante": {
-    "-OeyVo66CqG6pkFgnCCC": {
-      "evento": 1,
-      "nombre": "participante"
+    "-OeycsjZOLIFhqPHnQbN": {
+      "evento": 2,
+      "nombre": "participante 3"
+    },
+    "-Oeycwj1qN0OH6CZpZVv": {
+      "evento": 2,
+      "nombre": "participant 2"
     }
+  },
+  "sesion": {
+    "pass": 123,
+    "user": "user"
   }
 }

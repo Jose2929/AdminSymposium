@@ -94,8 +94,8 @@ class AdminPanel {
             console.log('📊 Datos completos de Firebase:', data);
             
             this.info = data.info || {};
-            this.eventos = Array.isArray(data.eventos) ? data.eventos : [];
-            
+            this.eventos = this.convertEventosToArray(data.eventos);
+
             // Convertir participantes de objeto a array
             this.participantes = this.convertParticipantesToArray(data.participantes);
             this.asistencia = Array.isArray(data.asistencia) ? data.asistencia : [];
@@ -130,7 +130,7 @@ class AdminPanel {
             
             // Actualizar datos locales
             this.info = data.info || {};
-            this.eventos = Array.isArray(data.eventos) ? data.eventos : [];
+            this.eventos = this.convertEventosToArray(data.eventos);
             this.participantes = this.convertParticipantesToArray(data.participantes);
             this.asistencia = Array.isArray(data.asistencia) ? data.asistencia : [];
 
@@ -221,10 +221,10 @@ class AdminPanel {
                 <td>${evento.fecha || ''}</td>
                 <td>${evento.nombre || ''}</td>
                 <td>
-                    <button class="btn btn-sm btn-primary me-1" onclick="adminPanel.editEvento(${i})">
+                    <button class="btn btn-sm btn-primary me-1" onclick="adminPanel.editEvento('${evento.firebaseId}')">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="adminPanel.deleteEvento(${i})">
+                    <button class="btn btn-sm btn-danger" onclick="adminPanel.deleteEvento('${evento.firebaseId}')">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -285,7 +285,7 @@ class AdminPanel {
     convertParticipantesToArray(participantesObj) {
         console.log('🔄 Convirtiendo participantes a array...');
         console.log('📥 Objeto participantes recibido:', participantesObj);
-        
+
         if (!participantesObj || typeof participantesObj !== 'object') {
             console.log('⚠️ Participantes no es un objeto válido, retornando array vacío');
             return [];
@@ -293,9 +293,9 @@ class AdminPanel {
 
         const array = [];
         const keys = Object.keys(participantesObj);
-        
+
         console.log('🔑 Keys encontradas:', keys);
-        
+
         keys.forEach((key, index) => {
             const participante = participantesObj[key];
             if (participante) {
@@ -307,8 +307,38 @@ class AdminPanel {
                 };
             }
         });
-        
+
         console.log('📤 Array de participantes resultante:', array);
+        return array;
+    }
+
+    convertEventosToArray(eventosObj) {
+        console.log('🔄 Convirtiendo eventos a array...');
+        console.log('📥 Objeto eventos recibido:', eventosObj);
+
+        if (!eventosObj || typeof eventosObj !== 'object') {
+            console.log('⚠️ Eventos no es un objeto válido, retornando array vacío');
+            return [];
+        }
+
+        const array = [];
+        const keys = Object.keys(eventosObj);
+
+        console.log('🔑 Keys encontradas:', keys);
+
+        keys.forEach((key, index) => {
+            const evento = eventosObj[key];
+            if (evento) {
+                console.log(`✅ Evento ${index} (key: ${key}):`, evento);
+                // Agregar el ID de Firebase al objeto
+                array[index] = {
+                    ...evento,
+                    firebaseId: key
+                };
+            }
+        });
+
+        console.log('📤 Array de eventos resultante:', array);
         return array;
     }
 
@@ -388,21 +418,19 @@ class AdminPanel {
                 nombre: document.getElementById('eventoNombre').value
             };
 
-            const eventoId = document.getElementById('eventoId').value;
+            const firebaseId = document.getElementById('eventoId').value;
 
-            if (eventoId) {
-                await window.firebaseManager.updateEvento(eventoId, eventoData);
-                this.eventos[eventoId] = eventoData;
+            if (firebaseId) {
+                await window.firebaseManager.updateEvento(firebaseId, eventoData);
                 this.showToast('Evento actualizado correctamente', 'success');
             } else {
                 const newId = await window.firebaseManager.addEvento(eventoData);
-                this.eventos[newId] = eventoData;
                 this.showToast('Evento agregado correctamente', 'success');
             }
 
             // Actualizar datos automáticamente después de guardar
             await this.refreshData();
-            
+
             // Cerrar modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('eventoModal'));
             modal.hide();
@@ -448,11 +476,11 @@ class AdminPanel {
         }
     }
 
-    editEvento(index) {
-        const evento = this.eventos[index];
+    editEvento(firebaseId) {
+        const evento = this.eventos.find(e => e.firebaseId === firebaseId);
         if (!evento) return;
 
-        document.getElementById('eventoId').value = index;
+        document.getElementById('eventoId').value = firebaseId;
         document.getElementById('eventoFecha').value = evento.fecha;
         document.getElementById('eventoNombre').value = evento.nombre;
         document.getElementById('eventoModalTitle').textContent = 'Editar Evento';
@@ -477,15 +505,15 @@ class AdminPanel {
         modal.show();
     }
 
-    async deleteEvento(index) {
+    async deleteEvento(firebaseId) {
         if (!confirm('¿Estás seguro de que deseas eliminar este evento?')) {
             return;
         }
 
         try {
-            await window.firebaseManager.deleteEvento(index);
+            await window.firebaseManager.deleteEvento(firebaseId);
             this.showToast('Evento eliminado correctamente', 'success');
-            
+
             // Actualizar datos automáticamente después de eliminar
             await this.refreshData();
         } catch (error) {
@@ -725,11 +753,11 @@ class AdminPanel {
     /**
      * Sobrescribir editEvento para aplicar formato de fecha
      */
-    editEvento(index) {
-        const evento = this.eventos[index];
+    editEvento(firebaseId) {
+        const evento = this.eventos.find(e => e.firebaseId === firebaseId);
         if (!evento) return;
 
-        document.getElementById('eventoId').value = index;
+        document.getElementById('eventoId').value = firebaseId;
         document.getElementById('eventoFecha').value = this.formatDateForDisplay(evento.fecha);
         document.getElementById('eventoNombre').value = evento.nombre;
         document.getElementById('eventoModalTitle').textContent = 'Editar Evento';
@@ -744,7 +772,7 @@ class AdminPanel {
     async saveEvento() {
         try {
             const fechaValue = document.getElementById('eventoFecha').value.trim();
-            
+
             // Validar formato de fecha
             if (fechaValue && !this.validateDateFormat(fechaValue)) {
                 this.showToast('Formato de fecha inválido. Use dd/mm/yyyy', 'error');
@@ -756,21 +784,19 @@ class AdminPanel {
                 nombre: document.getElementById('eventoNombre').value
             };
 
-            const eventoId = document.getElementById('eventoId').value;
+            const firebaseId = document.getElementById('eventoId').value;
 
-            if (eventoId) {
-                await window.firebaseManager.updateEvento(eventoId, eventoData);
-                this.eventos[eventoId] = eventoData;
+            if (firebaseId) {
+                await window.firebaseManager.updateEvento(firebaseId, eventoData);
                 this.showToast('Evento actualizado correctamente', 'success');
             } else {
                 const newId = await window.firebaseManager.addEvento(eventoData);
-                this.eventos[newId] = eventoData;
                 this.showToast('Evento agregado correctamente', 'success');
             }
 
             // Actualizar datos automáticamente después de guardar
             await this.refreshData();
-            
+
             // Cerrar modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('eventoModal'));
             modal.hide();

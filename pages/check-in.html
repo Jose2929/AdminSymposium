@@ -25,14 +25,14 @@
     <!-- Sección del Escáner QR -->
     <section class="qr-scanner-section" id="qr-scanner-section">
       <header class="scanner-header">
-        <h2><i class="fas fa-qrcode"></i> Escáner de Código QR</h2>
-        <p>Escanea cualquier código QR para ver su contenido de forma simple y rápida</p>
+        <h2><i class="fas fa-qrcode"></i> Registro de asistencia por Código QR</h2>
+        
       </header>
 
       <div class="scanner-container">
         <!-- Controles del escáner -->
         <div class="scanner-controls">
-          <button class="btn btn-primary" id="start-scanner-btn">
+          <button class="btn btn-primary" id="start-scanner-btn" onclick="document.getElementById('scan-result-container').style.display = 'none'">
             <i class="fas fa-play"></i>
             <span>Iniciar Escáner</span>
           </button>
