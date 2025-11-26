@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - CongresoApp</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../styles/admin.css">
+</head>
+<body>
+    <!-- Toast Container para notificaciones -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
+
+    <!-- Menú hamburguesa para móviles -->
+    <nav class="mobile-navbar d-md-none">
+        <div class="navbar-header">
+            <button class="hamburger-btn" type="button" id="mobileMenuToggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="navbar-brand">
+                <i class="fas fa-cogs"></i>
+                <span class="brand-text">Admin Panel</span>
+            </div>
+            <button class="refresh-btn" id="refreshBtnMobile">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="menu-overlay" id="menuOverlay"></div>
+            <div class="menu-content">
+                <div class="menu-header">
+                    <h5>Menú de Navegación</h5>
+                </div>
+                <ul class="menu-list">
+                    <li>
+                        <a href="#" data-section="info" class="menu-link active">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Información General</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-section="eventos" class="menu-link">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Eventos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-section="participantes" class="menu-link">
+                            <i class="fas fa-users"></i>
+                            <span>Participantes</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-section="asistencia" class="menu-link">
+                            <i class="fas fa-clipboard-check"></i>
+                            <span>Asistencia</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="menu-footer">
+                    <button class="btn btn-light btn-sm w-100 logout-mobile-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-1"></i>
+                        Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-primary sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-cogs text-white fa-2x"></i>
+                        <h5 class="text-white mt-2">Admin Panel</h5>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link text-white active" href="#" data-section="info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Información General
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#" data-section="eventos">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Eventos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#" data-section="participantes">
+                                <i class="fas fa-users me-2"></i>
+                                Participantes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#" data-section="asistencia">
+                                <i class="fas fa-clipboard-check me-2"></i>
+                                Asistencia
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <hr class="text-white">
+                    <div class="text-center">
+                        <button class="btn btn-outline-light btn-sm" onclick="location.reload()">
+                            <i class="fas fa-sync-alt me-1"></i>
+                            Actualizar
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2" id="sectionTitle">Información General</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshBtn">
+                                <i class="fas fa-sync-alt"></i> Actualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Información General -->
+                <div id="info-section" class="content-section">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-edit me-2"></i>Editar Información General</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="infoForm">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="titulo" class="form-label">Título del Evento</label>
+                                                <input type="text" class="form-control" id="titulo" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="fecha" class="form-label">Fecha</label>
+                                                <input type="text" class="form-control" id="fecha" placeholder="dd/mm/yyyy" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label for="lugar" class="form-label">Lugar</label>
+                                                <input type="text" class="form-control" id="lugar" required>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="escuela" class="form-label">Escuela</label>
+                                                <input type="text" class="form-control" id="escuela" required>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="horario" class="form-label">Horario</label>
+                                                <input type="text" class="form-control" id="horario" placeholder="09:00 AM - 06:00 PM" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="descripcion" class="form-label">Descripción</label>
+                                            <textarea class="form-control" id="descripcion" rows="3" required></textarea>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label for="ponente1" class="form-label">Ponente 1</label>
+                                                <input type="text" class="form-control" id="ponente1" required>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="ponente2" class="form-label">Ponente 2</label>
+                                                <input type="text" class="form-control" id="ponente2">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="ponente3" class="form-label">Ponente 3</label>
+                                                <input type="text" class="form-control" id="ponente3">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="correo" class="form-label">Correo Electrónico</label>
+                                                <input type="email" class="form-control" id="correo" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="telefono" class="form-label">Teléfono</label>
+                                                <input type="tel" class="form-control" id="telefono" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-1"></i>Guardar Cambios
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Eventos -->
+                <div id="eventos-section" class="content-section d-none">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5><i class="fas fa-calendar-alt me-2"></i>Gestión de Eventos</h5>
+                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#eventoModal">
+                                        <i class="fas fa-plus me-1"></i>Nuevo Evento
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped" id="eventosTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Fecha</th>
+                                                    <th>Nombre del Evento</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Los eventos se cargarán aquí dinámicamente -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Participantes -->
+                <div id="participantes-section" class="content-section d-none">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5><i class="fas fa-users me-2"></i>Gestión de Participantes</h5>
+                                    <div>
+                                        <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#participanteModal">
+                                            <i class="fas fa-plus me-1"></i>Nuevo Participante
+                                        </button>
+                                        <div class="btn-group">
+                                            <input type="text" class="form-control" placeholder="Buscar participante..." id="searchParticipante">
+                                            <button class="btn btn-outline-secondary" type="button" id="clearSearch">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped" id="participantesTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nombre</th>
+                                                    <th>Evento</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Los participantes se cargarán aquí dinámicamente -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Asistencia -->
+                <div id="asistencia-section" class="content-section d-none">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-clipboard-check me-2"></i>Registro de Asistencia</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped" id="asistenciaTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nombre</th>
+                                                    <th>Evento</th>
+                                                    <th>Fecha</th>
+                                                    <th>Hora</th>
+                                                    <th>Estado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Los datos de asistencia se cargarán aquí dinámicamente -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal para Evento -->
+    <div class="modal fade" id="eventoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventoModalTitle">Nuevo Evento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="eventoForm">
+                        <input type="hidden" id="eventoId">
+                        <div class="mb-3">
+                            <label for="eventoFecha" class="form-label">Fecha</label>
+                            <input type="text" class="form-control" id="eventoFecha" placeholder="dd/mm/yyyy" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventoNombre" class="form-label">Nombre del Evento</label>
+                            <input type="text" class="form-control" id="eventoNombre" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveEventoBtn">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Participante -->
+    <div class="modal fade" id="participanteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="participanteModalTitle">Nuevo Participante</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="participanteForm">
+                        <input type="hidden" id="participanteId">
+                        <div class="mb-3">
+                            <label for="participanteNombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="participanteNombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="participanteEvento" class="form-label">Evento</label>
+                            <select class="form-control" id="participanteEvento" required>
+                                <option value="">Seleccionar evento...</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveParticipanteBtn">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase JS -->
+    <script type="module" src="../js/ticket.js"></script>
+    <!-- Admin Panel JS -->
+    <script type="module" src="../js/admin-panel.js"></script>
+    
+    <!-- Menu Hamburger Functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuOverlay = document.getElementById('menuOverlay');
+            const menuLinks = document.querySelectorAll('.menu-link');
+            
+            // Toggle mobile menu
+            function toggleMobileMenu() {
+                mobileMenu.classList.toggle('active');
+                mobileMenuToggle.classList.toggle('active');
+                document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+            }
+            
+            // Close mobile menu
+            function closeMobileMenu() {
+                mobileMenu.classList.remove('active');
+                mobileMenuToggle.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            // Event listeners
+            mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+            menuOverlay.addEventListener('click', closeMobileMenu);
+            
+            // Close menu when clicking on a link
+            menuLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    // Remove active class from all links
+                    menuLinks.forEach(l => l.classList.remove('active'));
+                    // Add active class to clicked link
+                    e.target.closest('.menu-link').classList.add('active');
+                    // Close menu
+                    closeMobileMenu();
+                });
+            });
+            
+            // Close menu on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+                    closeMobileMenu();
+                }
+            });
+            
+            // Handle mobile refresh button
+            const refreshBtnMobile = document.getElementById('refreshBtnMobile');
+            if (refreshBtnMobile) {
+                refreshBtnMobile.addEventListener('click', () => {
+                    location.reload();
+                });
+            }
+        });
+    </script>
+    
+    <!-- Verificación de Sesión -->
+    <script>
+        // Verificar sesión al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const isLogged = sessionStorage.getItem('adminLoggedIn') === 'true';
+            
+            if (!isLogged) {
+                // Redirigir al login si no está autenticado
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Verificar si la sesión no ha expirado (24 horas)
+            const loginTime = sessionStorage.getItem('adminLoginTime');
+            if (loginTime) {
+                const now = new Date();
+                const loginDate = new Date(loginTime);
+                const hoursPassed = (now - loginDate) / (1000 * 60 * 60);
+                
+                if (hoursPassed > 24) {
+                    // Sesión expirada
+                    sessionStorage.removeItem('adminLoggedIn');
+                    sessionStorage.removeItem('adminLoginTime');
+                    alert('Su sesión ha expirado. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                }
+            }
+            
+            // Agregar botón de logout
+            addLogoutButton();
+        });
+        
+        function addLogoutButton() {
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+                const logoutSection = document.createElement('div');
+                logoutSection.className = 'mt-auto p-3';
+                logoutSection.innerHTML = `
+                    <hr class="text-white">
+                    <button class="btn btn-outline-light btn-sm w-100" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-1"></i>
+                        Cerrar Sesión
+                    </button>
+                `;
+                sidebar.appendChild(logoutSection);
+            }
+        }
+        
+        function logout() {
+            if (confirm('¿Está seguro de que desea cerrar sesión?')) {
+                sessionStorage.removeItem('adminLoggedIn');
+                sessionStorage.removeItem('adminLoginTime');
+                window.location.href = '../index.html';
+            }
+        }
+    </script>
+</body>
+</html>

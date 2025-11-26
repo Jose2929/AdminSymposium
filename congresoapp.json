@@ -1,0 +1,35 @@
+{
+  "evento": [
+    null,
+    {
+      "fecha": "12/07/2023",
+      "nombre": "Evento 1"
+    },
+    {
+      "fecha": "12/02/2023",
+      "nombre": "Evento2"
+    },
+    {
+      "fecha": "01/01/1999",
+      "nombre": "Evento 3"
+    }
+  ],
+  "info": {
+    "correo": "correo@correo.com",
+    "descripcion": "descripcion",
+    "escuela": "Nombre escuela",
+    "fecha": "12222-12-12",
+    "lugar": "Descripcion lugar",
+    "ponente1": "p1",
+    "ponente2": "p2",
+    "ponente3": "p3",
+    "telefono": "123456",
+    "titulo": "Congreso de educacion"
+  },
+  "participante": {
+    "-OeyVo66CqG6pkFgnCCC": {
+      "evento": 1,
+      "nombre": "participante"
+    }
+  }
+}
