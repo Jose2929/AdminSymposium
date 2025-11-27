@@ -259,16 +259,12 @@ class AdminPanel {
 
             console.log(`  ✅ Procesando participante ${i}:`, participante);
             
-            // Encontrar el evento correspondiente
-            const eventoIndex = participante.evento;
-            const evento = this.eventos[eventoIndex] || {};
-            
-            console.log(`  🎫 Evento correspondiente (índice ${eventoIndex}):`, evento);
+            const evento = participante.evento;
 
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${participante.nombre || ''}</td>
-                <td>${evento.nombre || 'N/A'}</td>
+                <td>${evento || 'N/A'}</td>
                 <td>
                     <button class="btn btn-sm btn-primary me-1" onclick="adminPanel.editParticipante(${i})">
                         <i class="fas fa-edit"></i>
@@ -432,7 +428,7 @@ class AdminPanel {
             console.log(`  ✅ Agregando evento ${i}:`, evento.nombre);
             
             const option = document.createElement('option');
-            option.value = i;
+            option.value = evento.nombre;
             option.textContent = evento.nombre;
             select.appendChild(option);
         }
@@ -499,7 +495,7 @@ class AdminPanel {
         try {
             const participanteData = {
                 nombre: document.getElementById('participanteNombre').value,
-                evento: parseInt(document.getElementById('participanteEvento').value)
+                evento: document.getElementById('participanteEvento').value
             };
 
             const firebaseId = document.getElementById('participanteId').value;

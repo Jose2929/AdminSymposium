@@ -15,7 +15,7 @@
   <!-- Header superior con botón de navegación -->
   <header class="site-header">
     <div class="header-container">
-      <a href="../index.html" class="back-button">
+      <a href="admin-panel.html" class="back-button">
         <i class="fas fa-arrow-left"></i>
         <span>Atrás</span>
       </a>
@@ -305,11 +305,14 @@
                 if (participante && participante.nombre) {
                     const option = document.createElement('option');
                     option.value = index.toString();
+
+                    console.log('***************🔍 Participante:', participante);
+                    
                     
                     // Intentar obtener el nombre del evento correspondiente
                     let eventoNombre = 'Evento';
-                    if (participante.evento !== undefined && eventos && eventos[participante.evento]) {
-                        eventoNombre = eventos[participante.evento].nombre || 'Evento';
+                    if (participante.evento !== undefined) {
+                        eventoNombre = participante.evento;
                     }
                     
                     option.textContent = `${participante.nombre} - ${eventoNombre}`;
@@ -762,7 +765,7 @@
                 console.log('✅ Ticket descargado exitosamente');
                 
                 // Mostrar notificación de éxito
-                showNotification('Ticket descargado exitosamente', 'success');
+                //showNotification('Ticket descargado exitosamente', 'success');
                 
             } catch (error) {
                 console.error('❌ Error descargando ticket:', error);

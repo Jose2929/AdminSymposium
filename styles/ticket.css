@@ -176,6 +176,7 @@ body {
 
 .event-selector,
 .participant-selector {
+  width: 100%;
   padding: 12px 16px;
   border: 2px solid var(--white);
   border-radius: var(--border-radius-small);
