@@ -293,50 +293,80 @@ class SimpleQRScanner {
     /**
      * Mostrar resultado del escaneo
      */
-    showResult(qrData) {
-
+    async showResult(qrData) {
         var decodedData = this.decodeQRData(qrData);
-        var nombre;
-        var evento;
+        var parts = decodedData.split('|');
+        console.log('Datos decodificados:', parts);
 
-        if(decodedData.indexOf('|') != -1){
-            var parts = decodedData.split('|');
-            nombre = parts[0];
-            evento = parts[1];
+        if (parts.length != 2) {
+            this.showError('QR Inválido', 'El código QR mostrado no es valido.');
+            return;
         }
 
+        var nombre = parts[0];
+        var evento = parts[1];
 
-        // Actualizar interfaz
-        this.elements.resultTitle.textContent = '¡Hola '+nombre+'!';
-        this.elements.resultMessage.innerHTML = 'Bienvenido a '+evento+'. <br> Tu asistencia ha sido registrada';
+        try {
+            const asistenciaRef = window.firebaseRef(window.firebaseDatabase, 'asistencia');
+            const snapshot = await window.firebaseGet(asistenciaRef);
 
-        // Mostrar contenido del QR
-        this.elements.resultDetails.innerHTML = `
-            <div class="details-grid">
-                <div class="detail-item">
-                    <span class="detail-key">Nombre:</span>
-                    <span class="detail-value">${nombre}</span>
+            let alreadyRegistered = false;
+            if (snapshot.exists()) {
+                const asistenciaData = snapshot.val();
+                for (let key in asistenciaData) {
+                    if (asistenciaData[key].nombre === nombre && asistenciaData[key].evento === evento) {
+                        alreadyRegistered = true;
+                        break;
+                    }
+                }
+            }
+
+            if (alreadyRegistered) {
+                // Ya registrado
+                this.elements.resultIcon.className = 'fas fa-exclamation-triangle';
+                this.elements.resultTitle.textContent = 'Advertencia';
+                this.elements.resultMessage.innerHTML = 'Ya realizaste el registro de tu asistencia.';
+            } else {
+                // Registrar asistencia
+                const fecha = new Date().toISOString();
+                const newRef = window.firebasePush(asistenciaRef);
+                await window.firebaseSet(newRef, { nombre, evento, fecha });
+
+                // Éxito
+                this.elements.resultIcon.className = 'fas fa-check-circle';
+                this.elements.resultTitle.textContent = '¡Hola ' + nombre + '!';
+                this.elements.resultMessage.innerHTML = 'Bienvenido a ' + evento + '. <br> Tu asistencia ha sido registrada';
+            }
+
+            // Mostrar detalles comunes
+            this.elements.resultDetails.innerHTML = `
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-key">Nombre:</span>
+                        <span class="detail-value">${nombre}</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-key">Evento:</span>
+                        <span class="detail-value">${evento}</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-key">Fecha:</span>
+                        <span class="detail-value">${new Date().toLocaleString('es-ES')}</span>
+                    </div>
                 </div>
-                
-                <div class="detail-item">
-                    <span class="detail-key">Evento:</span>
-                    <span class="detail-value">${evento}</span>
-                </div>
+            `;
 
-                <div class="detail-item">
-                    <span class="detail-key">Fecha:</span>
-                    <span class="detail-value">${new Date().toLocaleString('es-ES')}</span>
-                </div>
-            </div>
-        `;
+            // Mostrar contenedor de resultado
+            this.showResultContainer();
+            this.hideCameraContainer();
+            this.updateStartButton(true);
 
-        // Cambiar icono a éxito
-        this.elements.resultIcon.className = 'fas fa-check-circle';
-
-        // Mostrar contenedor de resultado
-        this.showResultContainer();
-        this.hideCameraContainer();
-        this.updateStartButton(true);
+        } catch (error) {
+            console.error('Error procesando asistencia:', error);
+            this.showError('Error', 'Ocurrió un error al procesar la asistencia.');
+        }
     }
 
     decodeQRData(base64String) {

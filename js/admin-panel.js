@@ -98,7 +98,7 @@ class AdminPanel {
 
             // Convertir participantes de objeto a array
             this.participantes = this.convertParticipantesToArray(data.participantes);
-            this.asistencia = Array.isArray(data.asistencia) ? data.asistencia : [];
+            this.asistencia = this.convertAsistenciaToArray(data.asistencia);
 
             console.log('📈 Estado después de cargar:');
             console.log('  - Eventos:', this.eventos);
@@ -132,7 +132,7 @@ class AdminPanel {
             this.info = data.info || {};
             this.eventos = this.convertEventosToArray(data.eventos);
             this.participantes = this.convertParticipantesToArray(data.participantes);
-            this.asistencia = Array.isArray(data.asistencia) ? data.asistencia : [];
+            this.asistencia = this.convertAsistenciaToArray(data.asistencia);
 
             console.log('📈 Estado después de actualizar:');
             console.log('  - Eventos:', this.eventos.length);
@@ -342,21 +342,76 @@ class AdminPanel {
         return array;
     }
 
+    convertAsistenciaToArray(asistenciaObj) {
+        console.log('🔄 Convirtiendo asistencia a array...');
+        console.log('📥 Objeto asistencia recibido:', asistenciaObj);
+
+        if (!asistenciaObj || typeof asistenciaObj !== 'object') {
+            console.log('⚠️ Asistencia no es un objeto válido, retornando array vacío');
+            return [];
+        }
+
+        const array = [];
+        const keys = Object.keys(asistenciaObj);
+
+        console.log('🔑 Keys encontradas:', keys);
+
+        keys.forEach((key) => {
+            const asistencia = asistenciaObj[key];
+            if (asistencia) {
+                console.log(`✅ Asistencia (key: ${key}):`, asistencia);
+                // Agregar el ID de Firebase al objeto
+                array.push({
+                    ...asistencia,
+                    id: key
+                });
+            }
+        });
+
+        console.log('📤 Array de asistencia resultante:', array);
+        return array;
+    }
+
     renderAsistencia() {
         const tbody = document.querySelector('#asistenciaTable tbody');
         tbody.innerHTML = '';
 
+        console.log('🎯 Renderizando asistencia...');
+        console.log('  📋 Array asistencia completo:', this.asistencia);
+        console.log('  📏 Length del array:', this.asistencia.length);
+
+        if (this.asistencia.length === 0) {
+            console.log('  ⚠️ Array de asistencia está vacío');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No hay registros de asistencia</td></tr>';
+            return;
+        }
+
         this.asistencia.forEach((registro) => {
             if (!registro) return;
 
-            const evento = this.eventos[registro.evento] || {};
-            
+            console.log(`  ✅ Procesando registro:`, registro);
+
+            // Formatear fecha y hora
+            let fechaStr = '';
+            let horaStr = '';
+            if (registro.fecha) {
+                try {
+                    const date = new Date(registro.fecha);
+                    fechaStr = date.toLocaleDateString('es-ES');
+                    horaStr = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                } catch (error) {
+                    console.warn('Error formateando fecha:', registro.fecha, error);
+                    fechaStr = registro.fecha;
+                    horaStr = '';
+                }
+            }
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${registro.nombre || ''}</td>
-                <td>${evento.nombre || 'N/A'}</td>
-                <td>${registro.fecha || ''}</td>
-                <td>${registro.hora || ''}</td>
+                <td>${registro.evento || ''}</td>
+                <td>${fechaStr}</td>
+                <td>${horaStr}</td>
                 <td><span class="badge bg-success">Presente</span></td>
             `;
             tbody.appendChild(row);
