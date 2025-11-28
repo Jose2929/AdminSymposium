@@ -33,7 +33,12 @@
     <section class="selectors-section">
 
       <div class="selector-group">
-        <label for="participante-select">Participante - Evento:</label>
+        <label for="evento-select">Evento:</label>
+        <select id="evento-select" onchange="handleEventChange(event)">
+        </select>
+      </div>
+      <div class="selector-group">
+        <label for="participante-select">Participante:</label>
         <select id="participante-select" class="participant-selector" onchange="handleParticipantChange(event)">
           <option value="dra-maria-rodriguez" selected>Dra. María Elena Rodríguez</option>
           <option value="dr-carlos-mendoza">Dr. Carlos Mendoza</option>
@@ -72,8 +77,7 @@
 
                 <!-- Información del evento -->
         <div class="event-details">
-            <label>Datos del evento </label>
-            <br><br>
+            <label>Datos del evento</label>
 
           <div class="event-info-grid">
             <div>
@@ -100,7 +104,7 @@
 
         <!-- Conferenciantes -->
         <div class="speakers-section">
-          <h3><i class="fas fa-microphone"></i> Conferencistas </h3>
+          <h3><i class="fas fa-microphone"></i> Ponente </h3>
           <div class="speakers-grid">
             <div class="speaker-card">
               <div class="speaker-avatar">
@@ -108,14 +112,12 @@
               </div>
               <div class="speaker-info">
                 <h4>Dr. Ana Martínez</h4>
-                <p>Universidad de Colima</p>
                 <small>Innovación Educativa</small>
               </div>
             </div>
             <div class="speaker-card">
               <div class="speaker-info">
                 <h4>Dr. Carlos López</h4>
-                <p>Tecnológico de Monterrey</p>
                 <small>Tecnología en Educación</small>
               </div>
               <div class="speaker-avatar">
@@ -128,7 +130,6 @@
               </div>
               <div class="speaker-info">
                 <h4>Dra. Sofia Ramírez</h4>
-                <p>UNAM</p>
                 <small>Pedagogía Digital</small>
               </div>
             </div>
@@ -137,7 +138,7 @@
 
         <!-- Pie de página -->
         <footer class="ticket-footer">
-          <p>Presenta esta tarjeta para autorizar tu entrada</p>
+          <p style="color: white;">Presenta esta imagen para registrar tu asistencia </p>
           
         </footer>
       </div>
@@ -161,302 +162,77 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
         import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
-        class TicketFirebaseManager {
-            constructor() {
-                this.app = null;
-                this.database = null;
-                this.init();
-            }
-
-            init() {
-                const firebaseConfig = {
-                    apiKey: "AIzaSyD_99EUF7i60QQ9IIqQwe9hzIN2yjEa2Ks",
-                    authDomain: "congresoapp-83547.firebaseapp.com",
-                    databaseURL: "https://congresoapp-83547-default-rtdb.firebaseio.com",
-                    projectId: "congresoapp-83547",
-                    storageBucket: "congresoapp-83547.firebasestorage.app",
-                    messagingSenderId: "689727649320",
-                    appId: "1:689727649320:web:8ab98cfc5b291d2792a71d"
-                };
-                this.app = initializeApp(firebaseConfig);
-                this.database = getDatabase(this.app);
-            }
-
-            async getInfo() {
-                try {
-                    const infoRef = ref(this.database, 'info');
-                    const snapshot = await get(infoRef);
-                    return snapshot.exists() ? snapshot.val() : null;
-                } catch (error) {
-                    console.error('Error obteniendo info:', error);
-                    return null;
-                }
-            }
-
-            async getEventos() {
-                try {
-                    const eventosRef = ref(this.database, 'evento');
-                    const snapshot = await get(eventosRef);
-                    return snapshot.exists() ? snapshot.val() : [];
-                } catch (error) {
-                    console.error('Error obteniendo eventos:', error);
-                    return [];
-                }
-            }
-
-            async getParticipantes() {
-                try {
-                    const participantesRef = ref(this.database, 'participante');
-                    const snapshot = await get(participantesRef);
-                    return snapshot.exists() ? snapshot.val() : [];
-                } catch (error) {
-                    console.error('Error obteniendo participantes:', error);
-                    return [];
-                }
-            }
-        }
-
-        // Inicializar FirebaseManager para tickets
-        const ticketFirebaseManager = new TicketFirebaseManager();
-
-        // Función para cargar y poblar los selects
-        async function loadTicketData() {
-            try {
-                console.log('🎫 Cargando datos para diseño de ticket...');
-                
-                // Cargar datos en paralelo
-                const [info, eventos, participantes] = await Promise.all([
-                    ticketFirebaseManager.getInfo(),
-                    ticketFirebaseManager.getEventos(),
-                    ticketFirebaseManager.getParticipantes()
-                ]);
-                
-                console.log('📋 Info:', info);
-                console.log('📅 Eventos:', eventos);
-                console.log('👥 Participantes:', participantes);
-                
-                // Poblar select de eventos
-                populateEventSelect(eventos);
-                
-                // Poblar select de participantes
-                populateParticipantSelect(participantes, eventos);
-                
-                // Actualizar información del ticket
-                updateTicketInfo(info);
-                
-                console.log('✅ Datos de ticket cargados exitosamente');
-                
-            } catch (error) {
-                console.error('❌ Error cargando datos de ticket:', error);
-                // Mantener valores por defecto en caso de error
-            }
-        }
-
-        // Poblar select de eventos
-        function populateEventSelect(eventos) {
-            const eventoSelect = document.getElementById('evento-select');
-            if (!eventoSelect) return;
-            
-            // Limpiar opciones existentes excepto la primera
-            eventoSelect.innerHTML = '<option value="">Selecciona un evento...</option>';
-            
-            // Convertir objeto a array si es necesario
-            const eventosArray = Array.isArray(eventos) ? eventos : Object.values(eventos || {});
-            
-            eventosArray.forEach((evento, index) => {
-                if (evento && evento.nombre) {
-                    const option = document.createElement('option');
-                    option.value = index.toString();
-                    option.textContent = evento.nombre;
-                    eventoSelect.appendChild(option);
-                }
-            });
-            
-            // Agregar eventos por defecto si no hay ninguno
-            if (eventosArray.length === 0) {
-                const defaultEvents = [
-                    { value: "educational-symposium-2025", text: "Educational Symposium 2025" },
-                    { value: "innovation-conference-2025", text: "Innovation Conference 2025" },
-                    { value: "tech-education-summit", text: "Tech Education Summit" },
-                    { value: "future-learning-forum", text: "Future Learning Forum" }
-                ];
-                
-                defaultEvents.forEach(event => {
-                    const option = document.createElement('option');
-                    option.value = event.value;
-                    option.textContent = event.text;
-                    eventoSelect.appendChild(option);
-                });
-            }
-        }
-
-        // Poblar select de participantes
-        function populateParticipantSelect(participantes, eventos) {
-            const participanteSelect = document.getElementById('participante-select');
-            if (!participanteSelect) return;
-            
-            // Limpiar opciones existentes excepto la primera
-            participanteSelect.innerHTML = '<option value="">Selecciona un participante...</option>';
-            
-            // Convertir objeto a array si es necesario
-            const participantesArray = Array.isArray(participantes) ? participantes : Object.values(participantes || {});
-            
-            participantesArray.forEach((participante, index) => {
-                if (participante && participante.nombre) {
-                    const option = document.createElement('option');
-                    option.value = index.toString();
-
-                    console.log('***************🔍 Participante:', participante);
-                    
-                    
-                    // Intentar obtener el nombre del evento correspondiente
-                    let eventoNombre = 'Evento';
-                    if (participante.evento !== undefined) {
-                        eventoNombre = participante.evento;
-                    }
-                    
-                    option.textContent = `${participante.nombre} - ${eventoNombre}`;
-                    participanteSelect.appendChild(option);
-                }
-            });
-            
-            // Agregar participantes por defecto si no hay ninguno
-            if (participantesArray.length === 0) {
-                const defaultParticipants = [
-                    { value: "dra-maria-rodriguez", text: "Dra. María Elena Rodríguez" },
-                    { value: "dr-carlos-mendoza", text: "Dr. Carlos Mendoza" },
-                    { value: "mra-ana-garcia", text: "Mra. Ana García" },
-                    { value: "ing-luis-torres", text: "Ing. Luis Torres" },
-                    { value: "dra-sofia-martinez", text: "Dra. Sofía Martínez" }
-                ];
-                
-                defaultParticipants.forEach(participant => {
-                    const option = document.createElement('option');
-                    option.value = participant.value;
-                    option.textContent = participant.text;
-                    participanteSelect.appendChild(option);
-                });
-            }
-        }
-
-        // Actualizar información del ticket
-        function updateTicketInfo(info) {
-            if (!info) return;
-            
-            // Actualizar título principal
-            const mainTitle = document.querySelector('.main-title');
-            if (mainTitle && info.titulo) {
-                mainTitle.textContent = info.titulo;
-            }
-            
-            // Actualizar subtítulo
-            const subtitle = document.querySelector('.subtitle');
-            if (subtitle && info.descripcion) {
-                subtitle.textContent = info.descripcion;
-            }
-            
-            // Actualizar fecha si está disponible
-            const fechaElement = document.querySelector('.info-item span');
-            if (fechaElement && info.fecha) {
-                fechaElement.textContent = info.fecha;
-            }
-            
-            // Actualizar lugar si está disponible
-            const lugarElements = document.querySelectorAll('.info-item span');
-            if (lugarElements.length > 1 && info.lugar) {
-                lugarElements[1].textContent = info.lugar;
-            }
-            
-            // Actualizar horario si está disponible
-            const horarioElements = document.querySelectorAll('.info-item span');
-            if (horarioElements.length > 2 && info.horario) {
-                horarioElements[2].textContent = info.horario;
-            }
-            
-            // Actualizar teléfono si está disponible
-            const phoneElement = document.querySelector('.contact-item span');
-            if (phoneElement && info.telefono) {
-                phoneElement.textContent = info.telefono;
-            }
-            
-            // Actualizar título de la página
-            if (info.titulo) {
-                document.title = `Gafete - ${info.titulo}`;
-            }
-            
-            // Actualizar header de la página
-            const headerTitle = document.querySelector('.header-title');
-            if (headerTitle && info.titulo) {
-                headerTitle.textContent = `Crear Entrada - ${info.titulo}`;
-            }
-            
-            // Actualizar título de la sección
-            const pageTitle = document.querySelector('.page-title h1');
-            if (pageTitle && info.titulo) {
-                pageTitle.textContent = `Crear Entrada - ${info.titulo}`;
-            }
-            
-            // Actualizar conferenciantes
-            updateSpeakers(info);
-        }
-
-        // Actualizar conferenciantes dinámicamente
-        function updateSpeakers(info) {
-            const speakersGrid = document.querySelector('.speakers-grid');
-            if (!speakersGrid || !info) return;
-
-            // Limpiar conferenciantes existentes
-            speakersGrid.innerHTML = '';
-
-            // Crear array de ponentes desde Firebase
-            const speakers = [];
-            if (info.ponente1) speakers.push({ name: info.ponente1, institution: info.escuela || 'Universidad', topic: 'Ponente Principal' });
-            if (info.ponente2) speakers.push({ name: info.ponente2, institution: info.escuela || 'Universidad', topic: 'Conferenciante' });
-            if (info.ponente3) speakers.push({ name: info.ponente3, institution: info.escuela || 'Universidad', topic: 'Conferenciante' });
-
-            // Si no hay ponentes, usar información por defecto
-            if (speakers.length === 0) {
-                speakers.push(
-                    { name: 'Dr. Ana Martínez', institution: 'Universidad de Colima', topic: 'Innovación Educativa' },
-                    { name: 'Dr. Carlos López', institution: 'Tecnológico de Monterrey', topic: 'Tecnología en Educación' },
-                    { name: 'Dra. Sofia Ramírez', institution: 'UNAM', topic: 'Pedagogía Digital' }
-                );
-            }
-
-            // Crear elementos de conferenciantes
-            speakers.forEach((speaker, index) => {
-                const speakerCard = document.createElement('div');
-                speakerCard.className = 'speaker-card';
-                const isEven = index % 2 === 0;
-                const avatarHtml = `<div class="speaker-avatar">
-                        <img src="https://randomuser.me/api/portraits/women/${index + 6}.jpg" alt="Foto del conferencista">
-                    </div>`;
-                const infoHtml = `<div class="speaker-info">
-                        <h4>${speaker.name}</h4>
-                        <small>${speaker.topic}</small>
-                    </div>`;
-                speakerCard.innerHTML = isEven ? avatarHtml + infoHtml : infoHtml + avatarHtml;
-                speakersGrid.appendChild(speakerCard);
-            });
-        }
+        // Inicializar Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_99EUF7i60QQ9IIqQwe9hzIN2yjEa2Ks",
+            authDomain: "congresoapp-83547.firebaseapp.com",
+            databaseURL: "https://congresoapp-83547-default-rtdb.firebaseio.com",
+            projectId: "congresoapp-83547",
+            storageBucket: "congresoapp-83547.firebasestorage.app",
+            messagingSenderId: "689727649320",
+            appId: "1:689727649320:web:8ab98cfc5b291d2792a71d"
+        };
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
         // Hacer disponible globalmente
-        window.ticketFirebaseManager = ticketFirebaseManager;
-        window.loadTicketData = loadTicketData;
+        window.firebaseApp = app;
+        window.firebaseDatabase = database;
     </script>
 
     <script>
+        // Importar Firebase desde el module
+        import('https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js').then(({ ref, get }) => {
+            window.firebaseRef = ref;
+            window.firebaseGet = get;
+        });
+
+        // Funciones Firebase
+        async function getInfo() {
+            try {
+                const infoRef = window.firebaseRef(window.firebaseDatabase, 'info');
+                const snapshot = await window.firebaseGet(infoRef);
+                return snapshot.exists() ? snapshot.val() : null;
+            } catch (error) {
+                console.error('Error obteniendo info:', error);
+                return null;
+            }
+        }
+
+        async function getEventos() {
+            try {
+                const eventosRef = window.firebaseRef(window.firebaseDatabase, 'evento');
+                const snapshot = await window.firebaseGet(eventosRef);
+                return snapshot.exists() ? snapshot.val() : {};
+            } catch (error) {
+                console.error('Error obteniendo eventos:', error);
+                return {};
+            }
+        }
+
+        async function getParticipantes() {
+            try {
+                const participantesRef = window.firebaseRef(window.firebaseDatabase, 'participante');
+                const snapshot = await window.firebaseGet(participantesRef);
+                return snapshot.exists() ? snapshot.val() : {};
+            } catch (error) {
+                console.error('Error obteniendo participantes:', error);
+                return {};
+            }
+        }
+
         // Variables globales para almacenar datos
-        let currentEventos = [];
+        let currentEventos = {};
         let currentParticipantes = [];
         let currentInfo = {};
 
         // Cargar datos al inicializar la página
         document.addEventListener('DOMContentLoaded', function() {
-            if (window.loadTicketData) {
+            // Esperar a que Firebase esté listo
+            setTimeout(() => {
                 loadTicketData();
-            }
-            
+            }, 1000);
+
             // Agregar event listeners para los selects
             setupSelectListeners();
         });
@@ -477,96 +253,231 @@
             }
         }
 
-        // Sobrescribir la función loadTicketData para almacenar datos globalmente
+        // Función para cargar datos
         async function loadTicketData() {
             try {
                 console.log('🎫 Cargando datos para diseño de ticket...');
-                
+
                 // Cargar datos en paralelo
                 const [info, eventos, participantes] = await Promise.all([
-                    ticketFirebaseManager.getInfo(),
-                    ticketFirebaseManager.getEventos(),
-                    ticketFirebaseManager.getParticipantes()
+                    getInfo(),
+                    getEventos(),
+                    getParticipantes()
                 ]);
-                
+
                 console.log('📋 Info:', info);
                 console.log('📅 Eventos:', eventos);
                 console.log('👥 Participantes:', participantes);
-                
+
                 // Almacenar datos globalmente
                 currentInfo = info || {};
-                currentEventos = Array.isArray(eventos) ? eventos : Object.values(eventos || {});
+                currentEventos = eventos || {};
                 currentParticipantes = Array.isArray(participantes) ? participantes : Object.values(participantes || {});
-                
-                // Poblar selects
+                console.log('💾 Datos almacenados globalmente:');
+                console.log('  - currentEventos:', currentEventos);
+                console.log('  - currentParticipantes:', currentParticipantes);
+
+                // Poblar select de eventos
                 populateEventSelect(currentEventos);
-                populateParticipantSelect(currentParticipantes, currentEventos);
-                
+
                 // Actualizar información del ticket
                 updateTicketInfo(currentInfo);
 
-                // Generar QR inicial con el participante por defecto
-                const defaultParticipant = currentParticipantes[0];
-                if (defaultParticipant) {
-                    const eventName = currentEventos[defaultParticipant.evento]?.nombre || 'Educational Symposium 2025';
-                    generateQR(defaultParticipant.nombre, eventName);
+                // Seleccionar valores por defecto si no hay ninguno
+                const eventoSelect = document.getElementById('evento-select');
+
+                if (eventoSelect.options.length > 1 && !eventoSelect.value) {
+                    eventoSelect.selectedIndex = 1; // Seleccionar el primer evento
+                    eventoSelect.dispatchEvent(new Event('change')); // Trigger change event para filtrar participantes
+                } else {
+                    // Si no hay eventos, poblar participantes vacíos
+                    populateParticipantSelect([], currentEventos);
                 }
 
                 console.log('✅ Datos de ticket cargados exitosamente');
-                
+
             } catch (error) {
                 console.error('❌ Error cargando datos de ticket:', error);
                 // Mantener valores por defecto en caso de error
             }
         }
 
+        // Actualizar información del ticket
+        function updateTicketInfo(info) {
+            if (!info) return;
+
+            // Actualizar título principal
+            const mainTitle = document.querySelector('.main-title');
+            if (mainTitle && info.titulo) {
+                mainTitle.textContent = info.titulo;
+            }
+
+            // Actualizar subtítulo
+            const subtitle = document.querySelector('.subtitle');
+            if (subtitle && info.descripcion) {
+                subtitle.textContent = info.descripcion;
+            }
+
+            // Actualizar fecha si está disponible
+            const fechaElement = document.querySelector('.info-item span');
+            if (fechaElement && info.fecha) {
+                fechaElement.textContent = info.fecha;
+            }
+
+            // Actualizar lugar si está disponible
+            const lugarElements = document.querySelectorAll('.info-item span');
+            if (lugarElements.length > 1 && info.lugar) {
+                lugarElements[1].textContent = info.lugar;
+            }
+
+            // Actualizar horario si está disponible
+            const horarioElements = document.querySelectorAll('.info-item span');
+            if (horarioElements.length > 2 && info.horario) {
+                horarioElements[2].textContent = info.horario;
+            }
+
+            // Actualizar teléfono si está disponible
+            const phoneElement = document.querySelector('.contact-item span');
+            if (phoneElement && info.telefono) {
+                phoneElement.textContent = info.telefono;
+            }
+
+            // Actualizar título de la página
+            if (info.titulo) {
+                document.title = `Gafete - ${info.titulo}`;
+            }
+
+            // Actualizar header de la página
+            const headerTitle = document.querySelector('.header-title');
+            if (headerTitle && info.titulo) {
+                headerTitle.textContent = `Crear Entrada - ${info.titulo}`;
+            }
+
+            // Actualizar título de la sección
+            const pageTitle = document.querySelector('.page-title h1');
+            if (pageTitle && info.titulo) {
+                pageTitle.textContent = `Crear Entrada - ${info.titulo}`;
+            }
+
+            // Conferenciantes se actualizan solo cuando se selecciona un evento
+        }
+
+        // Actualizar conferenciantes dinámicamente
+        function updateSpeakers(evento) {
+            const speakersGrid = document.querySelector('.speakers-grid');
+            if (!speakersGrid || !evento) return;
+
+            // Limpiar conferenciantes existentes
+            speakersGrid.innerHTML = '';
+
+            // Mostrar solo el ponente principal (ponente1)
+            if (evento.ponente1) {
+                const speakerCard = document.createElement('div');
+                speakerCard.className = 'speaker-card';
+
+                // Usar imagen del evento si está disponible, sino imagen por defecto
+                const imageSrc = evento.imagenPonente || `https://randomuser.me/api/portraits/women/1.jpg`;
+
+                const avatarHtml = `<div class="speaker-avatar">
+                        <img src="${imageSrc}" alt="Foto del conferencista">
+                    </div>`;
+                const infoHtml = `<div class="speaker-info">
+                        <h4>${evento.ponente1}</h4>
+                        <small>Tel: ${evento.telefono || 'N/A'}</small>
+                    </div>`;
+                speakerCard.innerHTML = avatarHtml + infoHtml;
+                speakersGrid.appendChild(speakerCard);
+            } else {
+                // Si no hay ponente, usar información por defecto
+                const speakerCard = document.createElement('div');
+                speakerCard.className = 'speaker-card';
+                const avatarHtml = `<div class="speaker-avatar">
+                        <img src="https://randomuser.me/api/portraits/women/1.jpg" alt="Foto del conferencista">
+                    </div>`;
+                const infoHtml = `<div class="speaker-info">
+                        <h4>Dr. Ana Martínez</h4>
+                        <small>Tel: N/A</small>
+                    </div>`;
+                speakerCard.innerHTML = avatarHtml + infoHtml;
+                speakersGrid.appendChild(speakerCard);
+            }
+        }
+
         // Manejar cambio de evento
         function handleEventChange(event) {
-            const selectedEventIndex = parseInt(event.target.value);
-            
-            if (selectedEventIndex >= 0 && currentEventos[selectedEventIndex]) {
-                const evento = currentEventos[selectedEventIndex];
-                
-                // Actualizar título del ticket
+            const selectedEventKey = event.target.value;
+            console.log('🔄 Cambio de evento:', selectedEventKey);
+            console.log('📊 currentEventos:', currentEventos);
+
+            if (selectedEventKey && currentEventos[selectedEventKey]) {
+                const evento = currentEventos[selectedEventKey];
+                console.log('✅ Evento encontrado:', evento);
+
+                // Actualizar título principal del ticket
                 const mainTitle = document.querySelector('.main-title');
                 if (mainTitle && evento.nombre) {
                     mainTitle.textContent = evento.nombre;
                 }
-                
-                // Actualizar fecha del evento si está disponible
-                if (evento.fecha) {
-                    const fechaElement = document.querySelector('.info-item span');
-                    if (fechaElement) {
-                        fechaElement.textContent = evento.fecha;
-                    }
+
+                // Actualizar subtítulo (descripción)
+                const subtitle = document.querySelector('.subtitle');
+                if (subtitle && evento.descripcion) {
+                    subtitle.textContent = evento.descripcion;
                 }
-                
+
+                // Actualizar fecha del evento
+                const fechaElement = document.querySelector('.info-item span');
+                if (fechaElement && evento.fecha) {
+                    fechaElement.textContent = evento.fecha;
+                }
+
+                // Actualizar lugar del evento
+                const lugarElements = document.querySelectorAll('.info-item span');
+                if (lugarElements.length > 1 && evento.lugar) {
+                    lugarElements[1].textContent = evento.lugar;
+                }
+
+                // Actualizar horario del evento
+                const horarioElements = document.querySelectorAll('.info-item span');
+                if (horarioElements.length > 2 && evento.horario) {
+                    horarioElements[2].textContent = evento.horario;
+                }
+
+                // Actualizar teléfono si está disponible
+                const phoneElement = document.querySelector('.contact-item span');
+                if (phoneElement && evento.telefono) {
+                    phoneElement.textContent = evento.telefono;
+                }
+
+                // Actualizar conferenciantes con datos del evento
+                updateSpeakers(evento);
+
                 // Filtrar participantes por evento seleccionado
-                filterParticipantsByEvent(selectedEventIndex);
+                const selectedEventName = currentEventos[selectedEventKey]?.nombre;
+                if (selectedEventName) {
+                    filterParticipantsByEvent(selectedEventName);
+                }
             }
         }
 
         // Manejar cambio de participante
         function handleParticipantChange(event) {
-            const select = document.getElementById("participante-select");
-            const textoMostrado = select.options[select.selectedIndex].text;
-
-            updateParticipantInfo(textoMostrado);
+            updateParticipantInfo();
         }
 
         // Filtrar participantes por evento
-        function filterParticipantsByEvent(eventIndex) {
+        function filterParticipantsByEvent(eventName) {
             const participanteSelect = document.getElementById('participante-select');
             if (!participanteSelect) return;
-            
+
             // Limpiar select
             participanteSelect.innerHTML = '<option value="">Selecciona un participante...</option>';
-            
-            // Filtrar participantes por evento
-            const filteredParticipants = currentParticipantes.filter(participante => 
-                participante && participante.evento === eventIndex
+
+            // Filtrar participantes por nombre del evento (ignorando mayúsculas/minúsculas)
+            const filteredParticipants = currentParticipantes.filter(participante =>
+                participante && participante.evento && participante.evento.toLowerCase() === eventName.toLowerCase()
             );
-            
+
             // Agregar participantes filtrados
             filteredParticipants.forEach((participante, index) => {
                 const option = document.createElement('option');
@@ -574,16 +485,30 @@
                 option.textContent = participante.nombre;
                 participanteSelect.appendChild(option);
             });
+
+            // Si hay participantes filtrados, seleccionar el primero y actualizar QR
+            if (filteredParticipants.length > 0) {
+                participanteSelect.value = currentParticipantes.indexOf(filteredParticipants[0]).toString();
+                updateParticipantInfo();
+            }
         }
 
         // Actualizar información del participante en el ticket
-        function updateParticipantInfo(participante) {
-            if (!participante) return;
+        function updateParticipantInfo() {
+            const participanteSelect = document.getElementById('participante-select');
+            const eventoSelect = document.getElementById('evento-select');
 
-            var nombre = participante.split(' - ')[0];
-            var eventName = participante.split(' - ')[1];
+            if (!participanteSelect || !eventoSelect || !participanteSelect.value || !eventoSelect.value) return;
 
-            generateQR(nombre, eventName);
+            const participanteIndex = parseInt(participanteSelect.value);
+            const participante = currentParticipantes[participanteIndex];
+
+            const eventoKey = eventoSelect.value;
+            const evento = currentEventos[eventoKey];
+
+            if (participante && evento) {
+                generateQR(participante.nombre, evento.nombre);
+            }
         }
 
         // Función para generar código QR
@@ -630,14 +555,14 @@
         function populateEventSelect(eventos) {
             const eventoSelect = document.getElementById('evento-select');
             if (!eventoSelect) return;
-            
+
             // Limpiar opciones existentes excepto la primera
             eventoSelect.innerHTML = '<option value="">Selecciona un evento...</option>';
-            
-            eventos.forEach((evento, index) => {
+
+            Object.entries(eventos).forEach(([key, evento]) => {
                 if (evento && evento.nombre) {
                     const option = document.createElement('option');
-                    option.value = index.toString();
+                    option.value = key;
                     option.textContent = evento.nombre;
                     eventoSelect.appendChild(option);
                 }
@@ -673,13 +598,10 @@
                 if (participante && participante.nombre) {
                     const option = document.createElement('option');
                     option.value = index.toString();
-                    
-                    // Intentar obtener el nombre del evento correspondiente
-                    let eventoNombre = 'Evento';
-                    if (participante.evento !== undefined && eventos && eventos[participante.evento]) {
-                        eventoNombre = eventos[participante.evento].nombre || 'Evento';
-                    }
-                    
+
+                    // Usar el nombre del evento directamente del participante
+                    const eventoNombre = participante.evento || 'Evento';
+
                     option.textContent = `${participante.nombre} - ${eventoNombre}`;
                     participanteSelect.appendChild(option);
                 }
@@ -916,7 +838,7 @@
             return encodeURIComponent(text).replace(/%20/g, '+');
         }
 
-        // Estilos adicionales para los botones
+        // Estilos adicionales para los botones y selects
         const style = document.createElement('style');
         style.textContent = `
             .btn-download, .btn-whatsapp {
@@ -924,20 +846,392 @@
                 position: relative;
                 overflow: hidden;
             }
-            
+
             .btn-download:hover, .btn-whatsapp:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             }
-            
+
             .btn-download:disabled, .btn-whatsapp:disabled {
                 opacity: 0.6;
                 cursor: not-allowed;
                 transform: none;
             }
-            
+
             .btn-download i, .btn-whatsapp i {
                 margin-right: 8px;
+            }
+
+            /* Estilos para los selects */
+            .selector-group select {
+                width: 100%;
+                max-width: 400px;
+                padding: 12px 16px;
+                border: 2px solid #e1e5e9;
+                border-radius: 8px;
+                font-size: 16px;
+                background-color: #fff;
+                color: #333;
+                transition: all 0.3s ease;
+                appearance: none;
+                background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+                background-repeat: no-repeat;
+                background-position: right 12px center;
+                background-size: 16px;
+                padding-right: 40px;
+            }
+
+            .selector-group select:focus {
+                outline: none;
+                border-color: #007bff;
+                box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+            }
+
+            .selector-group select:hover {
+                border-color: #007bff;
+            }
+
+            .selector-group label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #555;
+                font-size: 14px;
+            }
+
+            /* Mejorar diseño de la sección de datos del evento */
+            .event-details {
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                border-radius: 8px;
+                padding: 16px;
+                margin: 15px 0;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                border: 1px solid #dee2e6;
+            }
+
+            .event-details label {
+                font-size: 16px;
+                font-weight: 700;
+                color: #495057;
+                margin-bottom: 8px;
+                display: block;
+                text-align: center;
+            }
+
+            .event-info-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                margin-top: 8px;
+            }
+
+            .info-item {
+                display: flex;
+                align-items: center;
+                background: white;
+                padding: 8px 10px;
+                border-radius: 6px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                transition: transform 0.2s ease;
+            }
+
+            .info-item:hover {
+                transform: translateY(-1px);
+            }
+
+            .info-item i {
+                font-size: 18px;
+                color: #007bff;
+                margin-right: 6px;
+                min-width: 18px;
+            }
+
+            .info-item label {
+                font-weight: 600;
+                color: #6c757d;
+                margin-right: 4px;
+                font-size: 13px;
+            }
+
+            .info-item span {
+                font-weight: 500;
+                color: #495057;
+                font-size: 14px;
+            }
+            /* Rediseño profesional del ticket */
+            .ticket {
+                background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+                border-radius: 16px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+                border: 1px solid #e9ecef;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .ticket::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #8B0000 0%, #800020 50%, #8B0000 100%);
+            }
+
+            .ticket-header {
+                background: linear-gradient(135deg, #8B0000 0%, #800020 100%);
+                color: white;
+                padding: 24px;
+                text-align: center;
+                position: relative;
+            }
+
+            .logo-section {
+                margin-bottom: 16px;
+            }
+
+            .logo-placeholder {
+                width: 60px;
+                height: 60px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 12px;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+            }
+
+            .logo-placeholder i {
+                font-size: 28px;
+                color: white;
+            }
+
+            .main-title {
+                font-size: 22px;
+                font-weight: 700;
+                margin: 0 0 8px 0;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            }
+
+            .subtitle {
+                font-size: 14px;
+                opacity: 0.9;
+                font-weight: 400;
+                margin: 0;
+            }
+
+            .qr-section {
+                padding: 24px;
+                text-align: center;
+                background: #f8f9fa;
+                border-top: 1px solid #e9ecef;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            .qr-container {
+                display: inline-block;
+                background: white;
+                padding: 16px;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                border: 2px solid #8B0000;
+            }
+
+            .qr-placeholder {
+                width: 120px;
+                height: 120px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f8f9fa;
+                border-radius: 8px;
+            }
+
+            .qr-placeholder i {
+                font-size: 48px;
+                color: #6c757d;
+            }
+
+            .qr-placeholder img {
+                border-radius: 4px;
+            }
+
+            .event-details {
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                border-radius: 0;
+                padding: 20px;
+                margin: 0;
+                box-shadow: none;
+                border: none;
+                border-top: 1px solid #dee2e6;
+            }
+
+            .event-details label {
+                font-size: 16px;
+                font-weight: 700;
+                color: #495057;
+                margin-bottom: 12px;
+                display: block;
+                text-align: center;
+                background: linear-gradient(135deg, #8B0000 0%, #800020 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .event-info-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                margin-top: 12px;
+            }
+
+            .info-item {
+                display: flex;
+                align-items: center;
+                background: white;
+                padding: 12px 16px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                transition: all 0.3s ease;
+                border-left: 4px solid #8B0000;
+            }
+
+            .info-item:hover {
+                transform: translateX(4px);
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            }
+
+            .info-item i {
+                font-size: 20px;
+                color: #8B0000;
+                margin-right: 12px;
+                min-width: 20px;
+            }
+
+            .info-item label {
+                font-weight: 600;
+                color: #6c757d;
+                margin-right: 8px;
+                font-size: 13px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .info-item span {
+                font-weight: 500;
+                color: #495057;
+                font-size: 15px;
+            }
+
+            .speakers-section {
+                padding: 24px;
+                background: white;
+                border-top: 1px solid #e9ecef;
+            }
+
+            .speakers-section h3 {
+                color: #495057;
+                font-size: 18px;
+                font-weight: 700;
+                margin-bottom: 16px;
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .speakers-section h3 i {
+                color: #8B0000;
+            }
+
+            .speakers-grid {
+                display: flex;
+                justify-content: center;
+                gap: 16px;
+                flex-wrap: wrap;
+            }
+
+            .speaker-card {
+                background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+                border-radius: 12px;
+                padding: 16px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                border: 1px solid #e9ecef;
+                transition: all 0.3s ease;
+                min-width: 200px;
+                text-align: center;
+            }
+
+            .speaker-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            }
+
+            .speaker-avatar {
+                margin-bottom: 12px;
+            }
+
+            .speaker-avatar img {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                border: 3px solid #8B0000;
+                object-fit: cover;
+            }
+
+            .speaker-info h4 {
+                font-size: 16px;
+                font-weight: 600;
+                color: #495057;
+                margin: 0 0 4px 0;
+            }
+
+            .speaker-info small {
+                color: #6c757d;
+                font-size: 12px;
+                font-weight: 500;
+            }
+
+            .ticket-footer {
+                background: linear-gradient(135deg, #8B0000 0%, #800020 100%);
+                color: white;
+                padding: 16px 24px;
+                text-align: center;
+                font-weight: 500;
+            }
+
+            .ticket-footer p {
+                margin: 0;
+                font-size: 14px;
+            }
+
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                .ticket-header {
+                    padding: 20px 16px;
+                }
+
+                .main-title {
+                    font-size: 20px;
+                }
+
+                .qr-section, .event-details, .speakers-section {
+                    padding: 16px;
+                }
+
+                .speakers-grid {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .speaker-card {
+                    min-width: auto;
+                    width: 100%;
+                    max-width: 280px;
+                }
             }
         `;
         document.head.appendChild(style);

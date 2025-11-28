@@ -213,6 +213,17 @@ class FirebaseManager {
         }
     }
 
+    async deleteAsistencia(asistenciaId) {
+        try {
+            const asistenciaRef = ref(this.database, `asistencia/${asistenciaId}`);
+            await remove(asistenciaRef);
+            return true;
+        } catch (error) {
+            console.error('Error eliminando asistencia:', error);
+            throw error;
+        }
+    }
+
     // ========================
     // MÉTODOS DE UTILIDAD
     // ========================

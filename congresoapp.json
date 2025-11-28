@@ -1,31 +1,41 @@
 {
-  "evento": {
-    "-Of-fYpnR7RzMCgMP-a9": {
-      "fecha": "26/11/2025",
-      "nombre": "Congreso de estudiantes para validar un nuevo estudio"
+  "asistencia": {
+    "-Of7aXgoAb0CqpCJ4a6K": {
+      "evento": "Motivación docente",
+      "fecha": "2025-11-28T03:55:38.123Z",
+      "nombre": "Maria Jose Ramírez"
     }
   },
-  "info": {
-    "correo": "correo@correo.com",
-    "descripcion": "Descripcion del evento principal",
-    "escuela": "Nombre escuela",
-    "fecha": "12/12/2023",
-    "horario": "12:00 - 13:00",
-    "lugar": "Descripcion lugar",
-    "ponente1": "p1",
-    "ponente2": "p2",
-    "ponente3": "p3",
-    "telefono": "123456",
-    "titulo": "Congreso de educación"
+  "evento": {
+    "-Of7ml2J04Qqc5lxQ_Qd": {
+      "descripcion": "Ponencia y taller de motivación docente.",
+      "fecha": "06/12/2025",
+      "horario": "08:00 a.m. - 10:00 a.m.",
+      "imagenPonente": "data:image/png;base64,iVBORw0KGgo",
+      "lugar": "Aula 7",
+      "nombre": "Motivación Docente",
+      "ponente1": "Adriana",
+      "telefono": "7714096510"
+    },
+    "-Of7rf_D_T123DNMWUvj": {
+      "descripcion": "evento de prueba",
+      "fecha": "01/01/1993",
+      "horario": "9 a 10",
+      "imagenPonente": "data:image/png;base64,iVBOR",
+      "lugar": "lugar",
+      "nombre": "Evento test 2",
+      "ponente1": "Prueba ap am",
+      "telefono": "1234567890"
+    }
   },
   "participante": {
-    "-OeycsjZOLIFhqPHnQbN": {
-      "evento": 2,
-      "nombre": "participante 3"
+    "-Of7_bsuBU0JQPzklvfS": {
+      "evento": "Motivación docente",
+      "nombre": "Maria Jose Ramírez "
     },
-    "-Oeycwj1qN0OH6CZpZVv": {
-      "evento": 2,
-      "nombre": "participant 2"
+    "-Of7n7yYrMQdSeUMG9ZZ": {
+      "evento": "Evento test 2",
+      "nombre": "Jose Manuel"
     }
   },
   "sesion": {

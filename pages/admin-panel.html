@@ -40,13 +40,7 @@
                 </div>
                 <ul class="menu-list">
                     <li>
-                        <a href="#" data-section="info" class="menu-link active">
-                            <i class="fas fa-info-circle"></i>
-                            <span>Información General</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" data-section="eventos" class="menu-link">
+                        <a href="#" data-section="eventos" class="menu-link active">
                             <i class="fas fa-calendar-alt"></i>
                             <span>Eventos</span>
                         </a>
@@ -92,13 +86,7 @@
                     
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link text-white active" href="#" data-section="info">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Información General
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="#" data-section="eventos">
+                            <a class="nav-link text-white active" href="#" data-section="eventos">
                                 <i class="fas fa-calendar-alt me-2"></i>
                                 Eventos
                             </a>
@@ -136,91 +124,12 @@
             <!-- Main content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2" id="sectionTitle">Información General</h1>
+                    <h1 class="h2" id="sectionTitle">Gestión de Eventos</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <div class="btn-group me-2">
                             <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshBtn">
                                 <i class="fas fa-sync-alt"></i> Actualizar
                             </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección Información General -->
-                <div id="info-section" class="content-section">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5><i class="fas fa-edit me-2"></i>Editar Información General</h5>
-                                </div>
-                                <div class="card-body">
-                                    <form id="infoForm">
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label for="titulo" class="form-label">Título del Evento</label>
-                                                <input type="text" class="form-control" id="titulo" required>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label for="fecha" class="form-label">Fecha</label>
-                                                <input type="text" class="form-control" id="fecha" placeholder="dd/mm/yyyy" required>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-md-4 mb-3">
-                                                <label for="lugar" class="form-label">Lugar</label>
-                                                <input type="text" class="form-control" id="lugar" required>
-                                            </div>
-                                            <div class="col-md-4 mb-3">
-                                                <label for="escuela" class="form-label">Escuela</label>
-                                                <input type="text" class="form-control" id="escuela" required>
-                                            </div>
-                                            <div class="col-md-4 mb-3">
-                                                <label for="horario" class="form-label">Horario</label>
-                                                <input type="text" class="form-control" id="horario" placeholder="09:00 AM - 06:00 PM" required>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="mb-3">
-                                            <label for="descripcion" class="form-label">Descripción</label>
-                                            <textarea class="form-control" id="descripcion" rows="3" required></textarea>
-                                        </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-md-4 mb-3">
-                                                <label for="ponente1" class="form-label">Ponente 1</label>
-                                                <input type="text" class="form-control" id="ponente1" required>
-                                            </div>
-                                            <div class="col-md-4 mb-3">
-                                                <label for="ponente2" class="form-label">Ponente 2</label>
-                                                <input type="text" class="form-control" id="ponente2">
-                                            </div>
-                                            <div class="col-md-4 mb-3">
-                                                <label for="ponente3" class="form-label">Ponente 3</label>
-                                                <input type="text" class="form-control" id="ponente3">
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label for="correo" class="form-label">Correo Electrónico</label>
-                                                <input type="email" class="form-control" id="correo" required>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label for="telefono" class="form-label">Teléfono</label>
-                                                <input type="tel" class="form-control" id="telefono" required>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="text-end">
-                                            <button type="submit" class="btn btn-primary">
-                                                <i class="fas fa-save me-1"></i>Guardar Cambios
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -241,8 +150,13 @@
                                         <table class="table table-striped" id="eventosTable">
                                             <thead>
                                                 <tr>
+                                                    <th>Foto</th>
+                                                    <th>Título</th>
                                                     <th>Fecha</th>
-                                                    <th>Nombre del Evento</th>
+                                                    <th>Lugar</th>
+                                                    <th>Horario</th>
+                                                    <th>Ponente</th>
+                                                    <th>Teléfono</th>
                                                     <th>Acciones</th>
                                                 </tr>
                                             </thead>
@@ -302,8 +216,14 @@
                     <div class="row">
                         <div class="col-12">
                             <div class="card">
-                                <div class="card-header">
+                                <div class="card-header d-flex justify-content-between align-items-center">
                                     <h5><i class="fas fa-clipboard-check me-2"></i>Registro de Asistencia</h5>
+                                    <div class="d-flex align-items-center">
+                                        <label for="asistenciaFilter" class="form-label me-2 mb-0">Filtrar por evento:</label>
+                                        <select id="asistenciaFilter" class="form-select form-select-sm" style="min-width: 200px;">
+                                            <option value="todos">Todos los eventos</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
@@ -315,6 +235,7 @@
                                                     <th>Fecha</th>
                                                     <th>Hora</th>
                                                     <th>Estado</th>
+                                                    <th>Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -342,13 +263,71 @@
                 <div class="modal-body">
                     <form id="eventoForm">
                         <input type="hidden" id="eventoId">
-                        <div class="mb-3">
-                            <label for="eventoFecha" class="form-label">Fecha</label>
-                            <input type="text" class="form-control" id="eventoFecha" placeholder="dd/mm/yyyy" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="eventoNombre" class="form-label">Título del Evento</label>
+                                <input type="text" class="form-control" id="eventoNombre" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="eventoFecha" class="form-label">Fecha</label>
+                                <input type="text" class="form-control" id="eventoFecha" placeholder="dd/mm/yyyy" required>
+                            </div>
                         </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="eventoLugar" class="form-label">Lugar</label>
+                                <input type="text" class="form-control" id="eventoLugar" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="eventoHorario" class="form-label">Horario</label>
+                                <input type="text" class="form-control" id="eventoHorario" placeholder="09:00 AM - 06:00 PM" required>
+                            </div>
+                        </div>
+                        
                         <div class="mb-3">
-                            <label for="eventoNombre" class="form-label">Nombre del Evento</label>
-                            <input type="text" class="form-control" id="eventoNombre" required>
+                            <label for="eventoDescripcion" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="eventoDescripcion" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="eventoPonente1" class="form-label">Ponente</label>
+                                <input type="text" class="form-control" id="eventoPonente1" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="eventoTelefono" class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="eventoTelefono" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Sección de Imagen del Ponente -->
+                        <div class="mb-3">
+                            <label for="ponenteImagen" class="form-label">Foto del Ponente</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="file" class="form-control" id="ponenteImagen" accept="image/*">
+                                    <div class="form-text">Formatos soportados: JPG, PNG, GIF (máx. 5MB)</div>
+                                </div>
+                                <div class="col-md-6 d-flex align-items-center">
+                                    <button type="button" class="btn btn-outline-secondary me-2" id="editImagenBtn" style="display: none;">
+                                        <i class="fas fa-crop me-1"></i>Recortar
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger" id="removeImagenBtn" style="display: none;">
+                                        <i class="fas fa-trash me-1"></i>Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Vista previa de la imagen -->
+                            <div id="imagenPreview" class="mt-3" style="display: none;">
+                                <div class="text-center">
+                                    <div class="ponente-image-container">
+                                        <img id="imagenDisplay" src="" alt="Foto del ponente" class="ponente-image-circle">
+                                    </div>
+                                    <small class="text-muted d-block mt-2">Vista previa de la foto del ponente</small>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -391,8 +370,67 @@
         </div>
     </div>
 
+    <!-- Modal para Recorte de Imagen del Ponente -->
+    <div class="modal fade" id="cropImageModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Recortar Foto del Ponente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div id="cropperContainer" style="position: relative; width: 100%; height: 400px; overflow: hidden;">
+                                <img id="cropperImage" src="" alt="Imagen a recortar" style="max-width: 100%;">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex flex-column gap-3">
+                                <div>
+                                    <h6>Aspecto para foto de ponente:</h6>
+                                    <div class="btn-group-vertical w-100" role="group">
+                                        <input type="radio" class="btn-check" name="aspectRatio" id="free" value="NaN" checked>
+                                        <label class="btn btn-outline-secondary" for="free">Libre</label>
+                                        
+                                        <input type="radio" class="btn-check" name="aspectRatio" id="square" value="1">
+                                        <label class="btn btn-outline-secondary" for="square">Circular</label>
+                                        
+                                        <input type="radio" class="btn-check" name="aspectRatio" id="portrait" value="0.75">
+                                        <label class="btn btn-outline-secondary" for="portrait">Retrato</label>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h6>Zoom:</h6>
+                                    <input type="range" class="form-range" id="zoomSlider" min="0.1" max="3" step="0.01" value="1">
+                                </div>
+                                
+                                <div>
+                                    <h6>Vista previa circular:</h6>
+                                    <div class="border rounded p-2 text-center">
+                                        <canvas id="previewCanvas" width="120" height="120" style="max-width: 100%; border-radius: 50%;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="applyCropBtn">Aplicar Recorte</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Cropper.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+    <!-- Cropper.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     <!-- Firebase JS -->
     <script type="module" src="../js/ticket.js"></script>
     <!-- Admin Panel JS -->

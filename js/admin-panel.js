@@ -1,17 +1,19 @@
 class AdminPanel {
     constructor() {
-        this.currentSection = 'info';
+        this.currentSection = 'eventos';
         this.eventos = [];
         this.participantes = [];
         this.asistencia = [];
-        this.info = {};
+        this.currentImageFile = null;
+        this.currentImageBase64 = '';
+        this.cropper = null;
         this.init();
     }
 
     async init() {
         this.setupEventListeners();
         await this.loadData();
-        this.showSection('info');
+        this.showSection('eventos');
     }
 
     setupEventListeners() {
@@ -48,11 +50,7 @@ class AdminPanel {
             await this.refreshData();
         });
 
-        // Formulario de información
-        document.getElementById('infoForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.saveInfo();
-        });
+
 
         // Formulario de evento
         document.getElementById('saveEventoBtn').addEventListener('click', () => {
@@ -74,6 +72,11 @@ class AdminPanel {
             this.renderParticipantes();
         });
 
+        // Filtro de asistencia por evento
+        document.getElementById('asistenciaFilter').addEventListener('change', (e) => {
+            this.filterAsistencia(e.target.value);
+        });
+
         // Limpiar modales al cerrarse
         document.getElementById('eventoModal').addEventListener('hidden.bs.modal', () => {
             this.clearEventoForm();
@@ -82,6 +85,9 @@ class AdminPanel {
         document.getElementById('participanteModal').addEventListener('hidden.bs.modal', () => {
             this.clearParticipanteForm();
         });
+
+        // Event listeners para manejo de imágenes
+        this.setupImageEventListeners();
     }
 
     async loadData() {
@@ -93,7 +99,6 @@ class AdminPanel {
             
             console.log('📊 Datos completos de Firebase:', data);
             
-            this.info = data.info || {};
             this.eventos = this.convertEventosToArray(data.eventos);
 
             // Convertir participantes de objeto a array
@@ -105,7 +110,6 @@ class AdminPanel {
             console.log('  - Participantes:', this.participantes);
             console.log('  - Asistencia:', this.asistencia);
 
-            this.renderInfo();
             this.renderEventos();
             this.renderParticipantes();
             this.renderAsistencia();
@@ -129,7 +133,6 @@ class AdminPanel {
             const data = await window.firebaseManager.getAllData();
             
             // Actualizar datos locales
-            this.info = data.info || {};
             this.eventos = this.convertEventosToArray(data.eventos);
             this.participantes = this.convertParticipantesToArray(data.participantes);
             this.asistencia = this.convertAsistenciaToArray(data.asistencia);
@@ -140,11 +143,12 @@ class AdminPanel {
             console.log('  - Asistencia:', this.asistencia.length);
 
             // Re-renderizar todas las secciones sin mostrar toast de carga
-            this.renderInfo();
             this.renderEventos();
             this.renderParticipantes();
             this.renderAsistencia();
             this.populateEventoSelect();
+            this.populateAsistenciaFilter();
+            this.populateAsistenciaFilter();
 
             console.log('✅ Datos actualizados correctamente');
         } catch (error) {
@@ -174,7 +178,6 @@ class AdminPanel {
 
         // Actualizar título
         const titles = {
-            'info': 'Información General',
             'eventos': 'Gestión de Eventos',
             'participantes': 'Gestión de Participantes',
             'asistencia': 'Registro de Asistencia'
@@ -184,21 +187,7 @@ class AdminPanel {
         this.currentSection = sectionName;
     }
 
-    renderInfo() {
-        if (!this.info) return;
 
-        document.getElementById('titulo').value = this.info.titulo || '';
-        document.getElementById('fecha').value = this.info.fecha || '';
-        document.getElementById('lugar').value = this.info.lugar || '';
-        document.getElementById('escuela').value = this.info.escuela || '';
-        document.getElementById('horario').value = this.info.horario || '';
-        document.getElementById('descripcion').value = this.info.descripcion || '';
-        document.getElementById('ponente1').value = this.info.ponente1 || '';
-        document.getElementById('ponente2').value = this.info.ponente2 || '';
-        document.getElementById('ponente3').value = this.info.ponente3 || '';
-        document.getElementById('correo').value = this.info.correo || '';
-        document.getElementById('telefono').value = this.info.telefono || '';
-    }
 
     renderEventos() {
         const tbody = document.querySelector('#eventosTable tbody');
@@ -217,9 +206,18 @@ class AdminPanel {
             console.log(`  ✅ Evento ${i}:`, evento);
 
             const row = document.createElement('tr');
+            const imagenPonente = evento.imagenPonente ? 
+                `<img src="${evento.imagenPonente}" alt="Foto del ponente" class="ponente-image-circle-table">` : 
+                '<div class="ponente-placeholder"><i class="fas fa-user"></i></div>';
+            
             row.innerHTML = `
-                <td>${evento.fecha || ''}</td>
+                <td class="text-center">${imagenPonente}</td>
                 <td>${evento.nombre || ''}</td>
+                <td>${evento.fecha || ''}</td>
+                <td>${evento.lugar || ''}</td>
+                <td>${evento.horario || ''}</td>
+                <td>${evento.ponente1 || ''}</td>
+                <td>${evento.telefono || ''}</td>
                 <td>
                     <button class="btn btn-sm btn-primary me-1" onclick="adminPanel.editEvento('${evento.firebaseId}')">
                         <i class="fas fa-edit"></i>
@@ -368,21 +366,24 @@ class AdminPanel {
         return array;
     }
 
-    renderAsistencia() {
+    renderAsistencia(filteredAsistencia = null) {
         const tbody = document.querySelector('#asistenciaTable tbody');
         tbody.innerHTML = '';
 
-        console.log('🎯 Renderizando asistencia...');
-        console.log('  📋 Array asistencia completo:', this.asistencia);
-        console.log('  📏 Length del array:', this.asistencia.length);
+        const asistenciaToRender = filteredAsistencia || this.asistencia;
 
-        if (this.asistencia.length === 0) {
+        console.log('🎯 Renderizando asistencia...', filteredAsistencia ? '(filtrada)' : '(completa)');
+        console.log('  📋 Array asistencia a renderizar:', asistenciaToRender);
+        console.log('  📏 Length del array:', asistenciaToRender.length);
+
+        if (asistenciaToRender.length === 0) {
             console.log('  ⚠️ Array de asistencia está vacío');
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No hay registros de asistencia</td></tr>';
+            const colspan = filteredAsistencia ? '6' : '6';
+            tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center">No hay registros de asistencia${filteredAsistencia ? ' para este evento' : ''}</td></tr>`;
             return;
         }
 
-        this.asistencia.forEach((registro) => {
+        asistenciaToRender.forEach((registro) => {
             if (!registro) return;
 
             console.log(`  ✅ Procesando registro:`, registro);
@@ -409,6 +410,11 @@ class AdminPanel {
                 <td>${fechaStr}</td>
                 <td>${horaStr}</td>
                 <td><span class="badge bg-success">Presente</span></td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="adminPanel.deleteAsistencia('${registro.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
             `;
             tbody.appendChild(row);
         });
@@ -422,11 +428,11 @@ class AdminPanel {
 
         for (let i = 0; i < this.eventos.length; i++) {
             const evento = this.eventos[i];
-            
+
             if (!evento) continue;
 
             console.log(`  ✅ Agregando evento ${i}:`, evento.nombre);
-            
+
             const option = document.createElement('option');
             option.value = evento.nombre;
             option.textContent = evento.nombre;
@@ -434,39 +440,49 @@ class AdminPanel {
         }
     }
 
-    async saveInfo() {
-        try {
-            const formData = {
-                titulo: document.getElementById('titulo').value,
-                fecha: document.getElementById('fecha').value,
-                lugar: document.getElementById('lugar').value,
-                escuela: document.getElementById('escuela').value,
-                horario: document.getElementById('horario').value,
-                descripcion: document.getElementById('descripcion').value,
-                ponente1: document.getElementById('ponente1').value,
-                ponente2: document.getElementById('ponente2').value,
-                ponente3: document.getElementById('ponente3').value,
-                correo: document.getElementById('correo').value,
-                telefono: document.getElementById('telefono').value
-            };
+    populateAsistenciaFilter() {
+        const select = document.getElementById('asistenciaFilter');
+        if (!select) return;
 
-            await window.firebaseManager.setInfo(formData);
-            this.info = formData;
-            this.showToast('Información guardada correctamente', 'success');
-            
-            // Actualizar datos automáticamente después de guardar
-            await this.refreshData();
-        } catch (error) {
-            console.error('Error guardando info:', error);
-            this.showToast('Error al guardar la información', 'error');
+        select.innerHTML = '<option value="todos">Todos los eventos</option>';
+
+        console.log('📋 Poblando filtro de asistencia...');
+
+        for (let i = 0; i < this.eventos.length; i++) {
+            const evento = this.eventos[i];
+
+            if (!evento) continue;
+
+            console.log(`  ✅ Agregando evento al filtro ${i}:`, evento.nombre);
+
+            const option = document.createElement('option');
+            option.value = evento.nombre;
+            option.textContent = evento.nombre;
+            select.appendChild(option);
         }
     }
 
+
+
     async saveEvento() {
         try {
+            const fechaValue = document.getElementById('eventoFecha').value.trim();
+
+            // Validar formato de fecha
+            if (fechaValue && !this.validateDateFormat(fechaValue)) {
+                this.showToast('Formato de fecha inválido. Use dd/mm/yyyy', 'error');
+                return;
+            }
+
             const eventoData = {
-                fecha: document.getElementById('eventoFecha').value,
-                nombre: document.getElementById('eventoNombre').value
+                nombre: document.getElementById('eventoNombre').value,
+                fecha: this.formatDateForSave(fechaValue),
+                lugar: document.getElementById('eventoLugar').value,
+                horario: document.getElementById('eventoHorario').value,
+                descripcion: document.getElementById('eventoDescripcion').value,
+                ponente1: document.getElementById('eventoPonente1').value,
+                telefono: document.getElementById('eventoTelefono').value,
+                imagenPonente: this.currentImageBase64 || ''
             };
 
             const firebaseId = document.getElementById('eventoId').value;
@@ -532,9 +548,21 @@ class AdminPanel {
         if (!evento) return;
 
         document.getElementById('eventoId').value = firebaseId;
-        document.getElementById('eventoFecha').value = evento.fecha;
-        document.getElementById('eventoNombre').value = evento.nombre;
+        document.getElementById('eventoNombre').value = evento.nombre || '';
+        document.getElementById('eventoFecha').value = this.formatDateForDisplay(evento.fecha) || '';
+        document.getElementById('eventoLugar').value = evento.lugar || '';
+        document.getElementById('eventoHorario').value = evento.horario || '';
+        document.getElementById('eventoDescripcion').value = evento.descripcion || '';
+        document.getElementById('eventoPonente1').value = evento.ponente1 || '';
+        document.getElementById('eventoTelefono').value = evento.telefono || '';
         document.getElementById('eventoModalTitle').textContent = 'Editar Evento';
+
+        // Cargar imagen del ponente si existe
+        if (evento.imagenPonente) {
+            this.loadExistingImage(evento.imagenPonente);
+        } else {
+            this.clearImagePreview();
+        }
 
         const modal = new bootstrap.Modal(document.getElementById('eventoModal'));
         modal.show();
@@ -599,6 +627,23 @@ class AdminPanel {
         }
     }
 
+    async deleteAsistencia(asistenciaId) {
+        if (!confirm('¿Estás seguro de que deseas eliminar este registro de asistencia?')) {
+            return;
+        }
+
+        try {
+            await window.firebaseManager.deleteAsistencia(asistenciaId);
+            this.showToast('Registro de asistencia eliminado correctamente', 'success');
+
+            // Actualizar datos automáticamente después de eliminar
+            await this.refreshData();
+        } catch (error) {
+            console.error('Error eliminando registro de asistencia:', error);
+            this.showToast('Error al eliminar el registro de asistencia', 'error');
+        }
+    }
+
     filterParticipantes(searchTerm) {
         const filtered = window.firebaseManager.searchParticipantes(this.participantes, searchTerm);
         const tbody = document.querySelector('#participantesTable tbody');
@@ -609,7 +654,7 @@ class AdminPanel {
 
             const index = this.participantes.indexOf(participante);
             const evento = this.eventos[participante.evento] || {};
-            
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${participante.nombre || ''}</td>
@@ -627,10 +672,29 @@ class AdminPanel {
         });
     }
 
+    filterAsistencia(eventName) {
+        console.log('🔍 Filtrando asistencia por evento:', eventName);
+
+        if (eventName === 'todos' || !eventName) {
+            // Mostrar todos los registros
+            this.renderAsistencia();
+            return;
+        }
+
+        // Filtrar registros por evento
+        const filteredAsistencia = this.asistencia.filter(registro =>
+            registro && registro.evento && registro.evento.toLowerCase() === eventName.toLowerCase()
+        );
+
+        console.log('📋 Registros filtrados:', filteredAsistencia);
+        this.renderAsistencia(filteredAsistencia);
+    }
+
     clearEventoForm() {
         document.getElementById('eventoForm').reset();
         document.getElementById('eventoId').value = '';
         document.getElementById('eventoModalTitle').textContent = 'Nuevo Evento';
+        this.clearImagePreview();
     }
 
     clearParticipanteForm() {
@@ -743,118 +807,171 @@ class AdminPanel {
         }
     }
 
-    /**
-     * Sobrescribir renderInfo para aplicar formato de fecha
-     */
-    renderInfo() {
-        if (!this.info) return;
 
-        document.getElementById('titulo').value = this.info.titulo || '';
-        document.getElementById('fecha').value = this.formatDateForDisplay(this.info.fecha) || '';
-        document.getElementById('lugar').value = this.info.lugar || '';
-        document.getElementById('escuela').value = this.info.escuela || '';
-        document.getElementById('horario').value = this.info.horario || '';
-        document.getElementById('descripcion').value = this.info.descripcion || '';
-        document.getElementById('ponente1').value = this.info.ponente1 || '';
-        document.getElementById('ponente2').value = this.info.ponente2 || '';
-        document.getElementById('ponente3').value = this.info.ponente3 || '';
-        document.getElementById('correo').value = this.info.correo || '';
-        document.getElementById('telefono').value = this.info.telefono || '';
-    }
 
-    /**
-     * Sobrescribir saveInfo para aplicar formato de fecha
-     */
-    async saveInfo() {
-        try {
-            const fechaValue = document.getElementById('fecha').value.trim();
-            
-            // Validar formato de fecha
-            if (fechaValue && !this.validateDateFormat(fechaValue)) {
-                this.showToast('Formato de fecha inválido. Use dd/mm/yyyy', 'error');
-                return;
+
+
+
+
+
+
+    // ========================================
+    // FUNCIONES DE MANEJO DE IMÁGENES DEL PONENTE
+    // ========================================
+
+    setupImageEventListeners() {
+        // Cargar imagen del ponente
+        document.getElementById('ponenteImagen').addEventListener('change', (e) => {
+            this.handleImageUpload(e);
+        });
+
+        // Botones de edición de imagen
+        document.getElementById('editImagenBtn').addEventListener('click', () => {
+            this.openCropModal();
+        });
+
+        document.getElementById('removeImagenBtn').addEventListener('click', () => {
+            this.clearImagePreview();
+        });
+
+        // Event listeners para modal de recorte
+        document.querySelectorAll('input[name="aspectRatio"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (this.cropper) {
+                    this.cropper.setAspectRatio(parseFloat(e.target.value));
+                }
+            });
+        });
+
+        document.getElementById('zoomSlider').addEventListener('input', (e) => {
+            if (this.cropper) {
+                this.cropper.zoomTo(parseFloat(e.target.value));
             }
+        });
 
-            const formData = {
-                titulo: document.getElementById('titulo').value,
-                fecha: this.formatDateForSave(fechaValue),
-                lugar: document.getElementById('lugar').value,
-                escuela: document.getElementById('escuela').value,
-                horario: document.getElementById('horario').value,
-                descripcion: document.getElementById('descripcion').value,
-                ponente1: document.getElementById('ponente1').value,
-                ponente2: document.getElementById('ponente2').value,
-                ponente3: document.getElementById('ponente3').value,
-                correo: document.getElementById('correo').value,
-                telefono: document.getElementById('telefono').value
-            };
+        document.getElementById('applyCropBtn').addEventListener('click', () => {
+            this.applyCrop();
+        });
 
-            await window.firebaseManager.setInfo(formData);
-            this.info = formData;
-            this.showToast('Información guardada correctamente', 'success');
-            
-            // Actualizar datos automáticamente después de guardar
-            await this.refreshData();
-        } catch (error) {
-            console.error('Error guardando info:', error);
-            this.showToast('Error al guardar la información', 'error');
-        }
+        // Limpiar modal de imagen al cerrarse
+        document.getElementById('cropImageModal').addEventListener('hidden.bs.modal', () => {
+            if (this.cropper) {
+                this.cropper.destroy();
+                this.cropper = null;
+            }
+        });
     }
 
-    /**
-     * Sobrescribir editEvento para aplicar formato de fecha
-     */
-    editEvento(firebaseId) {
-        const evento = this.eventos.find(e => e.firebaseId === firebaseId);
-        if (!evento) return;
+    handleImageUpload(event) {
+        const file = event.target.files[0];
+        
+        if (!file) return;
 
-        document.getElementById('eventoId').value = firebaseId;
-        document.getElementById('eventoFecha').value = this.formatDateForDisplay(evento.fecha);
-        document.getElementById('eventoNombre').value = evento.nombre;
-        document.getElementById('eventoModalTitle').textContent = 'Editar Evento';
+        // Validar tipo de archivo
+        if (!file.type.startsWith('image/')) {
+            this.showToast('Por favor, seleccione un archivo de imagen válido', 'error');
+            return;
+        }
 
-        const modal = new bootstrap.Modal(document.getElementById('eventoModal'));
+        // Validar tamaño (5MB máximo)
+        if (file.size > 5 * 1024 * 1024) {
+            this.showToast('La imagen debe ser menor a 5MB', 'error');
+            return;
+        }
+
+        this.currentImageFile = file;
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            this.currentImageBase64 = e.target.result;
+            this.showImagePreview();
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    showImagePreview() {
+        const preview = document.getElementById('imagenPreview');
+        const imageDisplay = document.getElementById('imagenDisplay');
+        const editBtn = document.getElementById('editImagenBtn');
+        const removeBtn = document.getElementById('removeImagenBtn');
+
+        imageDisplay.src = this.currentImageBase64;
+        preview.style.display = 'block';
+        editBtn.style.display = 'inline-block';
+        removeBtn.style.display = 'inline-block';
+    }
+
+    loadExistingImage(base64) {
+        this.currentImageBase64 = base64;
+        this.currentImageFile = null;
+        this.showImagePreview();
+    }
+
+    clearImagePreview() {
+        const preview = document.getElementById('imagenPreview');
+        const editBtn = document.getElementById('editImagenBtn');
+        const removeBtn = document.getElementById('removeImagenBtn');
+        const fileInput = document.getElementById('ponenteImagen');
+
+        preview.style.display = 'none';
+        editBtn.style.display = 'none';
+        removeBtn.style.display = 'none';
+        fileInput.value = '';
+        
+        this.currentImageFile = null;
+        this.currentImageBase64 = '';
+    }
+
+    openCropModal() {
+        if (!this.currentImageBase64) {
+            this.showToast('No hay imagen para recortar', 'error');
+            return;
+        }
+
+        const cropperImage = document.getElementById('cropperImage');
+        cropperImage.src = this.currentImageBase64;
+
+        const modal = new bootstrap.Modal(document.getElementById('cropImageModal'));
         modal.show();
+
+        // Inicializar cropper después de que la imagen se carga
+        cropperImage.onload = () => {
+            if (this.cropper) {
+                this.cropper.destroy();
+            }
+
+            this.cropper = new Cropper(cropperImage, {
+                aspectRatio: NaN, // Libre por defecto
+                viewMode: 1,
+                autoCropArea: 0.8,
+                responsive: true,
+                background: false,
+                checkCrossOrigin: false
+            });
+        };
     }
 
-    /**
-     * Sobrescribir saveEvento para aplicar formato de fecha
-     */
-    async saveEvento() {
-        try {
-            const fechaValue = document.getElementById('eventoFecha').value.trim();
+    applyCrop() {
+        if (!this.cropper) return;
 
-            // Validar formato de fecha
-            if (fechaValue && !this.validateDateFormat(fechaValue)) {
-                this.showToast('Formato de fecha inválido. Use dd/mm/yyyy', 'error');
-                return;
-            }
+        const canvas = this.cropper.getCroppedCanvas({
+            width: 400,
+            height: 400,
+            minWidth: 100,
+            minHeight: 100,
+            maxWidth: 600,
+            maxHeight: 600,
+            fillColor: '#fff',
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        });
 
-            const eventoData = {
-                fecha: this.formatDateForSave(fechaValue),
-                nombre: document.getElementById('eventoNombre').value
-            };
+        this.currentImageBase64 = canvas.toDataURL('image/jpeg', 0.9);
+        this.showImagePreview();
 
-            const firebaseId = document.getElementById('eventoId').value;
-
-            if (firebaseId) {
-                await window.firebaseManager.updateEvento(firebaseId, eventoData);
-                this.showToast('Evento actualizado correctamente', 'success');
-            } else {
-                const newId = await window.firebaseManager.addEvento(eventoData);
-                this.showToast('Evento agregado correctamente', 'success');
-            }
-
-            // Actualizar datos automáticamente después de guardar
-            await this.refreshData();
-
-            // Cerrar modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('eventoModal'));
-            modal.hide();
-        } catch (error) {
-            console.error('Error guardando evento:', error);
-            this.showToast('Error al guardar el evento', 'error');
-        }
+        const modal = bootstrap.Modal.getInstance(document.getElementById('cropImageModal'));
+        modal.hide();
     }
 
     showToast(message, type = 'info') {
