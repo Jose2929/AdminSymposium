@@ -8,25 +8,58 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <!-- Header superior con botón de navegación -->
-  <header class="site-header">
-    <div class="header-container">
-      <a href="../index.html" class="back-button">
-        <i class="fas fa-arrow-left"></i>
-        <span>Atrás</span>
-      </a>
-      <h1 class="header-title">Escáner QR</h1>
+  <!-- Botones flotantes -->
+  <div class="floating-buttons">
+    <button class="back-button" onclick="window.history.back()">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <button class="hamburger-menu" id="hamburger-menu">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+
+  <!-- Sidenav para selector de eventos -->
+  <nav class="sidenav" id="sidenav">
+    <div class="sidenav-header">
+      <h3>Seleccionar Evento</h3>
+      <button class="close-sidenav" id="close-sidenav">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
-  </header>
+    <div class="sidenav-content">
+      <div class="selector-group">
+        <label for="evento-select">Evento:</label>
+        <select id="evento-select" onchange="handleEventChange(event)">
+        </select>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Overlay para cerrar sidenav -->
+  <div class="sidenav-overlay" id="sidenav-overlay"></div>
 
   <main class="page">
-    
+
+    <!-- Información del evento compacta -->
+    <section class="event-info-section">
+      <div class="event-bar">
+        <div class="event-main">
+          <h2 id="event-title">Educational Symposium 2025</h2>
+          <p id="event-description">International Conference on Educational Innovation</p>
+          <div class="event-meta">
+            <span id="event-date">30 Noviembre 2025</span> |
+            <span id="event-location">Hidalgo, México</span> |
+            <span id="event-time">09:00 AM - 06:00 PM</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- Sección del Escáner QR -->
     <section class="qr-scanner-section" id="qr-scanner-section">
       <header class="scanner-header">
         <h2><i class="fas fa-qrcode"></i> Registro de asistencia por Código QR</h2>
-        
+        <p>Escanea el código QR del participante para registrar su entrada</p>
       </header>
 
       <div class="scanner-container">
@@ -58,7 +91,7 @@
           </div>
           <div class="scanner-status">
             <i class="fas fa-camera"></i>
-            <span id="camera-status">Cámara activa - Apunta al código QR</span>
+            <span id="camera-status" style="color: black;">Cámara activa - Apunta al código QR</span>
           </div>
           <div class="camera-info" id="camera-info" style="display: none;">
             <i class="fas fa-info-circle"></i>
@@ -127,5 +160,453 @@
     window.firebasePush = push;
   </script>
   <script src="../js/qr-scanner.js"></script>
+
+  <!-- Estilos adicionales para check-in -->
+  <script>
+    const style = document.createElement('style');
+    style.textContent = `
+      /* Botones flotantes */
+      .floating-buttons {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        z-index: 1100;
+        display: flex;
+        justify-content: space-between;
+        pointer-events: none;
+      }
+
+      .floating-buttons > * {
+        pointer-events: auto;
+      }
+
+      .back-button {
+        background: linear-gradient(135deg, #DC143C 0%, #800020 100%);
+        border: none;
+        color: white;
+        font-size: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+
+      .back-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(220, 20, 60, 0.4);
+      }
+
+      .hamburger-menu {
+        background: linear-gradient(135deg, #DC143C 0%, #800020 100%);
+        border: none;
+        color: white;
+        font-size: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+
+      .hamburger-menu:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(220, 20, 60, 0.4);
+      }
+
+      /* Sidenav */
+      .sidenav {
+        position: fixed;
+        top: 0;
+        left: -300px;
+        width: 300px;
+        height: 100vh;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        transition: left 0.3s ease;
+        z-index: 1100;
+        overflow-y: auto;
+      }
+
+      .sidenav.open {
+        left: 0;
+      }
+
+      .sidenav-header {
+        background: linear-gradient(135deg, #DC143C 0%, #800020 100%);
+        color: white;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .sidenav-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .close-sidenav {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+      }
+
+      .sidenav-content {
+        padding: 20px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      }
+
+      .sidenav-content .selector-group label {
+        color: #DC143C;
+        font-weight: 600;
+      }
+
+      .sidenav-content .selector-group select {
+        background: white;
+        border: 2px solid #DC143C;
+        color: #495057;
+        border-radius: 8px;
+      }
+
+      .sidenav-content .selector-group select:focus {
+        border-color: #800020;
+        box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.1);
+      }
+
+      .sidenav-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+        z-index: 1050;
+      }
+
+      .sidenav-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* Event Info Section compacta */
+      .event-info-section {
+        padding: 80px 20px 20px 20px; /* Espacio para el menú flotante */
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .event-bar {
+        background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+      }
+
+      .event-main {
+        text-align: center;
+      }
+
+      .event-main h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: white;
+        margin: 0 0 4px 0;
+      }
+
+      .event-main p {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.9);
+        margin: 0 0 8px 0;
+        font-weight: 500;
+      }
+
+      .event-meta {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+      }
+
+      .event-bar {
+        background: linear-gradient(135deg, #DC143C 0%, #800020 100%);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 4px 16px rgba(220, 20, 60, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 20px;
+      }
+
+      /* QR Scanner Section prominente */
+      .qr-scanner-section {
+        padding: 20px;
+        max-width: 100%;
+        margin: 0 auto;
+      }
+
+      .scanner-header {
+        text-align: center;
+        margin-bottom: 24px;
+        background: linear-gradient(135deg, #DC143C 0%, #800020 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(220, 20, 60, 0.3);
+      }
+
+      .scanner-header h2 {
+        font-size: 28px;
+        font-weight: 800;
+        color: white;
+        margin: 0 0 8px 0;
+      }
+
+      .scanner-header p {
+        color: rgba(255, 255, 255, 0.9);
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .scanner-container {
+        background: linear-gradient(145deg, #ffffff 0%, #fefefe 100%);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        border: 2px solid transparent;
+        background-clip: padding-box;
+      }
+
+      /* Botones */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #DC143C 0%, #800020 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);
+      }
+
+      .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+      }
+
+      .btn-outline {
+        background: transparent;
+        border: 2px solid #DC143C;
+        color: #DC143C;
+      }
+
+      .btn-outline:hover {
+        background: #DC143C;
+        color: white;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .floating-buttons {
+          top: 15px;
+          left: 15px;
+          right: 15px;
+        }
+
+        .back-button, .hamburger-menu {
+          width: 45px;
+          height: 45px;
+          font-size: 18px;
+        }
+
+        .event-info-section {
+          padding: 70px 15px 15px 15px;
+        }
+
+        .event-bar {
+          padding: 12px 16px;
+        }
+
+        .event-main h2 {
+          font-size: 18px;
+        }
+
+        .event-meta {
+          font-size: 12px;
+        }
+
+        .qr-scanner-section {
+          padding: 15px;
+        }
+
+        .scanner-header h2 {
+          font-size: 24px;
+        }
+
+        .scanner-container {
+          padding: 24px 16px;
+        }
+
+        .sidenav {
+          width: 280px;
+          left: -280px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .floating-buttons {
+          top: 10px;
+          left: 10px;
+          right: 10px;
+        }
+
+        .back-button, .hamburger-menu {
+          width: 40px;
+          height: 40px;
+          font-size: 16px;
+        }
+
+        .event-info-section {
+          padding: 65px 10px 10px 10px;
+        }
+
+        .event-bar {
+          padding: 10px 12px;
+        }
+
+        .event-main h2 {
+          font-size: 16px;
+        }
+
+        .event-meta {
+          font-size: 11px;
+        }
+
+        .scanner-header {
+          margin-bottom: 16px;
+        }
+
+        .scanner-header h2 {
+          font-size: 20px;
+        }
+
+        .scanner-container {
+          padding: 20px 12px;
+        }
+
+        .sidenav {
+          width: 100vw;
+          left: -100vw;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+
+  <!-- Script para funcionalidad del menú -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const hamburgerMenu = document.getElementById('hamburger-menu');
+      const sidenav = document.getElementById('sidenav');
+      const closeSidenav = document.getElementById('close-sidenav');
+      const sidenavOverlay = document.getElementById('sidenav-overlay');
+
+      // Abrir sidenav
+      hamburgerMenu.addEventListener('click', function() {
+        sidenav.classList.add('open');
+        sidenavOverlay.classList.add('active');
+      });
+
+      // Cerrar sidenav
+      closeSidenav.addEventListener('click', function() {
+        sidenav.classList.remove('open');
+        sidenavOverlay.classList.remove('active');
+      });
+
+      sidenavOverlay.addEventListener('click', function() {
+        sidenav.classList.remove('open');
+        sidenavOverlay.classList.remove('active');
+      });
+
+      // Cargar eventos (similar a ticket.js)
+      loadEvents();
+    });
+
+    async function loadEvents() {
+      try {
+        const eventosRef = window.firebaseRef(window.firebaseDatabase, 'evento');
+        const snapshot = await window.firebaseGet(eventosRef);
+        const eventos = snapshot.exists() ? snapshot.val() : {};
+
+        const eventoSelect = document.getElementById('evento-select');
+        eventoSelect.innerHTML = '<option value="">Selecciona un evento...</option>';
+
+        Object.entries(eventos).forEach(([key, evento]) => {
+          if (evento && evento.nombre) {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = evento.nombre;
+            eventoSelect.appendChild(option);
+          }
+        });
+      } catch (error) {
+        console.error('Error cargando eventos:', error);
+      }
+    }
+
+    function handleEventChange(event) {
+      const selectedEventKey = event.target.value;
+      if (selectedEventKey) {
+        loadEventInfo(selectedEventKey);
+      }
+    }
+
+    async function loadEventInfo(eventKey) {
+      try {
+        const eventoRef = window.firebaseRef(window.firebaseDatabase, `evento/${eventKey}`);
+        const snapshot = await window.firebaseGet(eventoRef);
+        const evento = snapshot.val();
+
+        if (evento) {
+          document.getElementById('event-title').textContent = evento.nombre || 'Evento';
+          document.getElementById('event-description').textContent = evento.descripcion || '';
+          document.getElementById('event-date').textContent = evento.fecha || '';
+          document.getElementById('event-location').textContent = evento.lugar || '';
+          document.getElementById('event-time').textContent = evento.horario || '';
+        }
+      } catch (error) {
+        console.error('Error cargando info del evento:', error);
+      }
+    }
+  </script>
 </body>
 </html>

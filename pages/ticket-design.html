@@ -51,9 +51,8 @@
 
     <section class="ticket-container" role="img" aria-label="Gafete de entrada al Educational Symposium 2025">
       <div class="ticket">
-        
-        
-        <!-- Header con logo y título -->
+
+        <!-- Header con logo y título mejorado -->
         <header class="ticket-header">
           <div class="logo-section">
             <div class="logo-placeholder">
@@ -62,84 +61,103 @@
           </div>
           <h1 class="main-title">Educational Symposium 2025</h1>
           <p class="subtitle">International Conference on Educational Innovation</p>
+          <div class="header-decoration">
+            <div class="decoration-line"></div>
+            <div class="decoration-dot"></div>
+            <div class="decoration-line"></div>
+          </div>
         </header>
 
-        <!-- Código QR -->
-         <br><br>
+        <!-- Código QR prominente con diseño especial -->
         <div class="qr-section">
           <div class="qr-container">
-            <div class="qr-placeholder">
-              <i class="fas fa-qrcode"></i>
+            <div class="qr-glow-effect"></div>
+            <div class="qr-content-wrapper">
+                <div class="centrar" style="">
+                    <div class="qr-placeholder">
+                      <i class="fas fa-qrcode"></i>
+                    </div>
+                </div>
+              <div class="qr-label">
+                <span>ESCANEA PARA VERIFICAR</span>
+              </div>
             </div>
-            
           </div>
         </div>
 
-                <!-- Información del evento -->
+        <!-- Información del evento con colores mejorados -->
         <div class="event-details">
-            <label>Datos del evento</label>
+          <div class="event-title-section">
+            <h2 class="event-title">DATOS DEL EVENTO</h2>
+            <div class="title-underline"></div>
+          </div>
 
           <div class="event-info-grid">
-            <div>
-                
-                <div class="info-item">
-                  <i class="fas fa-calendar-alt"></i>
-                  <label>Fecha: </label>
-                  <span>30 Noviembre 2025</span>
-                </div>
+            <div class="info-item date-item">
+              <div class="info-icon">
+                <i class="fas fa-calendar-alt"></i>
+              </div>
+              <div class="info-content">
+                <label>Fecha</label>
+                <span>30 Noviembre 2025</span>
+              </div>
             </div>
-            <div class="info-item">
-              <i class="fas fa-map-marker-alt"></i>
-              <label>Lugar: </label>
-              <span>Hidalgo, México</span>
+            <div class="info-item location-item">
+              <div class="info-icon">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+              <div class="info-content">
+                <label>Lugar</label>
+                <span>Hidalgo, México</span>
+              </div>
             </div>
-            <div class="info-item">
-              <i class="fas fa-clock"></i>
-              <label>Horario: </label>
-              <span>09:00 AM - 06:00 PM</span>
+            <div class="info-item time-item">
+              <div class="info-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="info-content">
+                <label>Horario</label>
+                <span>09:00 AM - 06:00 PM</span>
+              </div>
             </div>
           </div>
         </div>
 
-
-        <!-- Conferenciantes -->
+        <!-- Conferenciantes con diseño mejorado -->
         <div class="speakers-section">
-          <h3><i class="fas fa-microphone"></i> Ponente </h3>
+          <div class="speakers-header">
+            <h3><i class="fas fa-microphone"></i> Ponente Principal</h3>
+            <div class="speaker-decoration"></div>
+          </div>
           <div class="speakers-grid">
-            <div class="speaker-card">
+            <div class="speaker-card featured-speaker">
+              <div class="speaker-glow"></div>
               <div class="speaker-avatar">
                 <img src="https://randomuser.me/api/portraits/women/1.jpg" alt="Foto del conferencista">
+                <div class="avatar-badge">
+                  <i class="fas fa-star"></i>
+                </div>
               </div>
               <div class="speaker-info">
                 <h4>Dr. Ana Martínez</h4>
                 <small>Innovación Educativa</small>
-              </div>
-            </div>
-            <div class="speaker-card">
-              <div class="speaker-info">
-                <h4>Dr. Carlos López</h4>
-                <small>Tecnología en Educación</small>
-              </div>
-              <div class="speaker-avatar">
-                <img src="https://randomuser.me/api/portraits/women/2.jpg" alt="Foto del conferencista">
-              </div>
-            </div>
-            <div class="speaker-card">
-              <div class="speaker-avatar">
-                <img src="https://randomuser.me/api/portraits/women/3.jpg" alt="Foto del conferencista">
-              </div>
-              <div class="speaker-info">
-                <h4>Dra. Sofia Ramírez</h4>
-                <small>Pedagogía Digital</small>
+                <div class="speaker-specialty">Especialista en Tecnología Educativa</div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Pie de página -->
+        <!-- Pie de página mejorado -->
         <footer class="ticket-footer">
-          <p style="color: white;">Presenta esta imagen para registrar tu asistencia </p>
-          
+          <div class="footer-content">
+            <div class="footer-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <p style="color: white;">Presenta esta entrada para registrar tu asistencia</p>
+          </div>
+          <div class="footer-decoration">
+            <div class="footer-line"></div>
+          </div>
         </footer>
       </div>
     </section>
@@ -899,73 +917,18 @@
                 font-size: 14px;
             }
 
-            /* Mejorar diseño de la sección de datos del evento */
-            .event-details {
-                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                border-radius: 8px;
-                padding: 16px;
-                margin: 15px 0;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                border: 1px solid #dee2e6;
-            }
-
-            .event-details label {
-                font-size: 16px;
-                font-weight: 700;
-                color: #495057;
-                margin-bottom: 8px;
-                display: block;
-                text-align: center;
-            }
-
-            .event-info-grid {
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                margin-top: 8px;
-            }
-
-            .info-item {
-                display: flex;
-                align-items: center;
-                background: white;
-                padding: 8px 10px;
-                border-radius: 6px;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-                transition: transform 0.2s ease;
-            }
-
-            .info-item:hover {
-                transform: translateY(-1px);
-            }
-
-            .info-item i {
-                font-size: 18px;
-                color: #007bff;
-                margin-right: 6px;
-                min-width: 18px;
-            }
-
-            .info-item label {
-                font-weight: 600;
-                color: #6c757d;
-                margin-right: 4px;
-                font-size: 13px;
-            }
-
-            .info-item span {
-                font-weight: 500;
-                color: #495057;
-                font-size: 14px;
-            }
-            /* Rediseño profesional del ticket */
+            /* Rediseño moderno y colorido del ticket */
             .ticket {
-                background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-                border-radius: 16px;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
-                border: 1px solid #e9ecef;
-                overflow: hidden;
+                background: linear-gradient(145deg, #ffffff 0%, #fefefe 50%, #f8f9fa 100%);
+                border-radius: 20px;
+                box-shadow:
+                    0 12px 40px rgba(0, 0, 0, 0.15),
+                    0 4px 16px rgba(0, 0, 0, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+                border: 2px solid transparent;
+                background-clip: padding-box;
                 position: relative;
+                overflow: hidden;
             }
 
             .ticket::before {
@@ -974,252 +937,689 @@
                 top: 0;
                 left: 0;
                 right: 0;
-                height: 4px;
-                background: linear-gradient(90deg, #8B0000 0%, #800020 50%, #8B0000 100%);
+                height: 6px;
+                background: linear-gradient(90deg,
+                    #DC143C 0%,
+                    #800020 50%,
+                    #DC143C 100%);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             }
 
+            .ticket::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg,
+                    #DC143C 0%,
+                    #800020 50%,
+                    #DC143C 100%);
+                opacity: 0.8;
+            }
+
+            /* Header mejorado con gradientes dinámicos */
             .ticket-header {
-                background: linear-gradient(135deg, #8B0000 0%, #800020 100%);
+                background: linear-gradient(135deg,
+                    #DC143C 0%,
+                    #800020 50%,
+                    #DC143C 100%);
                 color: white;
-                padding: 24px;
+                padding: 32px 24px;
                 text-align: center;
                 position: relative;
+                overflow: hidden;
+            }
+
+            .ticket-header::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                animation: headerGlow 8s ease-in-out infinite;
+            }
+
+            @keyframes headerGlow {
+                0%, 100% { transform: scale(1) rotate(0deg); }
+                50% { transform: scale(1.1) rotate(180deg); }
             }
 
             .logo-section {
-                margin-bottom: 16px;
+                margin-bottom: 20px;
+                position: relative;
+                z-index: 2;
             }
 
             .logo-placeholder {
-                width: 60px;
-                height: 60px;
-                background: rgba(255, 255, 255, 0.2);
+                width: 80px;
+                height: 80px;
+                background: rgba(255, 255, 255, 0.25);
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin: 0 auto 12px;
-                border: 2px solid rgba(255, 255, 255, 0.3);
+                margin: 0 auto 16px;
+                border: 3px solid rgba(255, 255, 255, 0.4);
+                backdrop-filter: blur(10px);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+                position: relative;
+            }
+
+            .logo-placeholder::before {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 50%;
+                background: linear-gradient(45deg, #DC143C, #800020, #DC143C, #800020);
+                z-index: -1;
             }
 
             .logo-placeholder i {
-                font-size: 28px;
+                font-size: 36px;
                 color: white;
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
             }
 
             .main-title {
-                font-size: 22px;
-                font-weight: 700;
-                margin: 0 0 8px 0;
-                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                font-size: 28px;
+                font-weight: 800;
+                margin: 0 0 12px 0;
+                text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+                letter-spacing: 1px;
+                position: relative;
+                z-index: 2;
             }
 
             .subtitle {
-                font-size: 14px;
-                opacity: 0.9;
-                font-weight: 400;
+                font-size: 16px;
+                opacity: 0.95;
+                font-weight: 500;
                 margin: 0;
+                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+                position: relative;
+                z-index: 2;
             }
 
-            .qr-section {
-                padding: 24px;
-                text-align: center;
-                background: #f8f9fa;
-                border-top: 1px solid #e9ecef;
-                border-bottom: 1px solid #e9ecef;
-            }
-
-            .qr-container {
-                display: inline-block;
-                background: white;
-                padding: 16px;
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                border: 2px solid #8B0000;
-            }
-
-            .qr-placeholder {
-                width: 120px;
-                height: 120px;
+            .header-decoration {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: #f8f9fa;
-                border-radius: 8px;
+                gap: 12px;
+                margin-top: 20px;
+                position: relative;
+                z-index: 2;
+            }
+
+            .decoration-line {
+                width: 40px;
+                height: 2px;
+                background: rgba(255, 255, 255, 0.6);
+                border-radius: 1px;
+            }
+
+            .decoration-dot {
+                width: 8px;
+                height: 8px;
+                background: rgba(255, 255, 255, 0.8);
+                border-radius: 50%;
+                box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+            }
+
+            /* QR Section prominente con efectos especiales */
+            .qr-section {
+                padding: 40px 24px;
+                text-align: center;
+                background: linear-gradient(135deg,
+                    rgba(255, 255, 255, 0.95) 0%,
+                    rgba(248, 249, 250, 0.95) 50%,
+                    rgba(233, 236, 239, 0.95) 100%);
+                border-top: 2px solid #e9ecef;
+                border-bottom: 2px solid #e9ecef;
+                position: relative;
+            }
+
+            .qr-section::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: radial-gradient(circle at center, rgba(78, 205, 196, 0.05) 0%, transparent 70%);
+                pointer-events: none;
+            }
+
+            .qr-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                position: relative;
+                background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+                padding: 24px;
+                border-radius: 20px;
+                box-shadow:
+                    0 12px 32px rgba(0, 0, 0, 0.15),
+                    0 4px 16px rgba(0, 0, 0, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+                border: 3px solid transparent;
+                background-clip: padding-box;
+                transform: perspective(1000px) rotateX(2deg);
+                transition: all 0.4s ease;
+                margin: 0 auto;
+            }
+
+            .qr-container:hover {
+                transform: perspective(1000px) rotateX(0deg) scale(1.02);
+                box-shadow:
+                    0 16px 48px rgba(0, 0, 0, 0.2),
+                    0 8px 24px rgba(0, 0, 0, 0.15);
+            }
+
+            .qr-content-wrapper {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .qr-glow-effect {
+                position: absolute;
+                inset: -4px;
+                border-radius: 24px;
+                background: linear-gradient(45deg,
+                    #DC143C, #800020, #DC143C, #800020, #DC143C, #800020, #DC143C, #800020);
+                background-size: 400% 400%;
+                animation: qrGlow 6s ease-in-out infinite;
+                z-index: -1;
+                opacity: 0.7;
+            }
+
+            @keyframes qrGlow {
+                0%, 100% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+            }
+
+            .qr-container::before {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 22px;
+                background: linear-gradient(45deg, #DC143C, #800020, #DC143C, #800020);
+                z-index: -1;
+                opacity: 0.3;
+            }
+
+            .qr-placeholder {
+                width: 160px;
+                height: 160px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+                border-radius: 12px;
+                border: 2px solid #e9ecef;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .qr-placeholder::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(45deg,
+                    rgba(220, 20, 60, 0.1) 0%,
+                    rgba(128, 0, 32, 0.1) 50%,
+                    rgba(220, 20, 60, 0.1) 100%);
+                border-radius: 10px;
             }
 
             .qr-placeholder i {
-                font-size: 48px;
-                color: #6c757d;
+                font-size: 72px;
+                color: #495057;
+                position: relative;
+                z-index: 1;
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
             }
 
             .qr-placeholder img {
-                border-radius: 4px;
+                border-radius: 8px;
+                position: relative;
+                z-index: 1;
             }
 
+            .qr-label {
+                margin-top: 16px;
+                padding: 8px 16px;
+                background: linear-gradient(135deg, #DC143C 0%, #800020 100%);
+                color: white;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);
+                position: relative;
+                z-index: 1;
+            }
+
+            /* Event Details con colores mejorados */
             .event-details {
-                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                background: linear-gradient(135deg,
+                    rgba(255, 255, 255, 0.95) 0%,
+                    rgba(248, 249, 250, 0.95) 50%,
+                    rgba(233, 236, 239, 0.95) 100%);
                 border-radius: 0;
-                padding: 20px;
+                padding: 32px 24px;
                 margin: 0;
                 box-shadow: none;
                 border: none;
-                border-top: 1px solid #dee2e6;
+                border-top: 2px solid #e9ecef;
+                position: relative;
             }
 
-            .event-details label {
-                font-size: 16px;
-                font-weight: 700;
-                color: #495057;
-                margin-bottom: 12px;
-                display: block;
+            .event-title-section {
                 text-align: center;
-                background: linear-gradient(135deg, #8B0000 0%, #800020 100%);
+                margin-bottom: 24px;
+            }
+
+            .event-title {
+                font-size: 20px;
+                font-weight: 800;
+                color: transparent;
+                background: linear-gradient(135deg, #DC143C 0%, #800020 100%);
                 -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
                 background-clip: text;
+                margin: 0 0 8px 0;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }
+
+            .title-underline {
+                width: 80px;
+                height: 3px;
+                background: linear-gradient(90deg, #DC143C 0%, #800020 50%, #DC143C 100%);
+                margin: 0 auto;
+                border-radius: 2px;
+                box-shadow: 0 2px 8px rgba(220, 20, 60, 0.3);
             }
 
             .event-info-grid {
                 display: flex;
                 flex-direction: column;
-                gap: 8px;
-                margin-top: 12px;
+                gap: 16px;
+                margin-top: 24px;
             }
 
             .info-item {
                 display: flex;
                 align-items: center;
-                background: white;
-                padding: 12px 16px;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-                transition: all 0.3s ease;
-                border-left: 4px solid #8B0000;
+                background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+                padding: 20px 24px;
+                border-radius: 16px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+                transition: all 0.4s ease;
+                border: 1px solid rgba(0, 0, 0, 0.05);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .info-item::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 6px;
+                background: linear-gradient(180deg, #DC143C 0%, #800020 100%);
+                border-radius: 0 4px 4px 0;
             }
 
             .info-item:hover {
-                transform: translateX(4px);
-                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+                transform: translateX(8px) scale(1.02);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
             }
 
-            .info-item i {
-                font-size: 20px;
-                color: #8B0000;
-                margin-right: 12px;
-                min-width: 20px;
-            }
+            .info-item.date-item::before { background: linear-gradient(180deg, #DC143C 0%, #800020 100%); }
+            .info-item.location-item::before { background: linear-gradient(180deg, #DC143C 0%, #800020 100%); }
+            .info-item.time-item::before { background: linear-gradient(180deg, #DC143C 0%, #800020 100%); }
 
-            .info-item label {
-                font-weight: 600;
-                color: #6c757d;
-                margin-right: 8px;
-                font-size: 13px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-
-            .info-item span {
-                font-weight: 500;
-                color: #495057;
-                font-size: 15px;
-            }
-
-            .speakers-section {
-                padding: 24px;
-                background: white;
-                border-top: 1px solid #e9ecef;
-            }
-
-            .speakers-section h3 {
-                color: #495057;
-                font-size: 18px;
-                font-weight: 700;
-                margin-bottom: 16px;
-                text-align: center;
+            .info-icon {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 8px;
+                margin-right: 20px;
+                position: relative;
+                z-index: 1;
+            }
+
+            .date-item  { background: linear-gradient(135deg, #DC143C 0%, #800020 100%); }
+            .location-item  { background: linear-gradient(135deg, #DC143C 0%, #800020 100%); }
+            .time-item  { background: linear-gradient(135deg, #DC143C 0%, #800020 100%); }
+
+            .info-icon i {
+                font-size: 24px;
+                color: white;
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+            }
+
+            .info-content {
+                flex: 1;
+                position: relative;
+                z-index: 1;
+                
+            }
+
+            .info-item label {
+                font-weight: 700;
+                color: white;
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 4px;
+                display: block;
+            }
+
+            .info-item span {
+                font-weight: 600;
+                color: white;
+                font-size: 16px;
+                display: block;
+            }
+
+            /* Speakers Section mejorada */
+            .speakers-section {
+                padding: 32px 24px;
+                background: linear-gradient(135deg,
+                    rgba(255, 255, 255, 0.98) 0%,
+                    rgba(248, 249, 250, 0.98) 100%);
+                border-top: 2px solid #e9ecef;
+                position: relative;
+            }
+
+            .speakers-header {
+                text-align: center;
+                margin-bottom: 24px;
+            }
+
+            .speakers-section h3 {
+                color: #2d3748;
+                font-size: 20px;
+                font-weight: 800;
+                margin: 0 0 12px 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
             }
 
             .speakers-section h3 i {
-                color: #8B0000;
+                color: #DC143C;
+                font-size: 24px;
+            }
+
+            .speaker-decoration {
+                width: 60px;
+                height: 3px;
+                background: linear-gradient(90deg, #DC143C 0%, #800020 100%);
+                margin: 0 auto;
+                border-radius: 2px;
+                box-shadow: 0 2px 8px rgba(220, 20, 60, 0.3);
             }
 
             .speakers-grid {
                 display: flex;
                 justify-content: center;
-                gap: 16px;
+                gap: 24px;
                 flex-wrap: wrap;
             }
 
             .speaker-card {
-                background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-                border-radius: 12px;
-                padding: 16px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-                border: 1px solid #e9ecef;
-                transition: all 0.3s ease;
-                min-width: 200px;
-                text-align: center;
+                border-radius: 20px;
+                padding: 0;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+                border: 2px solid transparent;
+                background-clip: padding-box;
+                transition: all 0.4s ease;
+                min-width: 280px;
+                display: flex;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .speaker-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #DC143C 0%, #800020 100%);
+            }
+
+            .speaker-glow {
+                position: absolute;
+                inset: -2px;
+                border-radius: 22px;
+                background: linear-gradient(45deg, #DC143C, #800020, #DC143C, #800020);
+                background-size: 400% 400%;
+                animation: speakerGlow 8s ease-in-out infinite;
+                z-index: -1;
+                opacity: 0.3;
+            }
+
+            @keyframes speakerGlow {
+                0%, 100% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
             }
 
             .speaker-card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+                transform: translateY(-8px) scale(1.02);
+                box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
             }
 
             .speaker-avatar {
-                margin-bottom: 12px;
+                flex: 1;
+                position: relative;
+                border-radius: 18px 0 0 18px;
+                overflow: hidden;
+                height: 8rem;
             }
 
             .speaker-avatar img {
-                width: 60px;
-                height: 60px;
-                border-radius: 50%;
-                border: 3px solid #8B0000;
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+                border: none;
+                background: none;
                 object-fit: cover;
+                box-shadow: 0 8px 24px rgba(220, 20, 60, 0.3);
+            }
+
+            .avatar-badge {
+                position: absolute;
+                bottom: -5px;
+                right: -5px;
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 3px solid white;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .avatar-badge i {
+                font-size: 14px;
+                color: white;
+            }
+
+            .speaker-info {
+                flex: 1;
+                
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
             }
 
             .speaker-info h4 {
-                font-size: 16px;
-                font-weight: 600;
-                color: #495057;
-                margin: 0 0 4px 0;
+                font-size: 18px;
+                font-weight: 700;
+                color: #2d3748;
+                margin: 0 0 8px 0;
+                letter-spacing: 0.5px;
             }
 
             .speaker-info small {
-                color: #6c757d;
-                font-size: 12px;
-                font-weight: 500;
+                color: #718096;
+                font-size: 14px;
+                font-weight: 600;
+                display: block;
+                margin-bottom: 8px;
             }
 
-            .ticket-footer {
-                background: linear-gradient(135deg, #8B0000 0%, #800020 100%);
-                color: white;
-                padding: 16px 24px;
-                text-align: center;
+            .speaker-specialty {
+                color: #DC143C;
+                font-size: 12px;
                 font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            /* Footer mejorado */
+            .ticket-footer {
+                background: linear-gradient(135deg,
+                    #DC143C 0%,
+                    #800020 50%,
+                    #DC143C 100%);
+                color: white;
+                padding: 24px;
+                text-align: center;
+                font-weight: 600;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .ticket-footer::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                animation: footerGlow 10s ease-in-out infinite;
+            }
+
+            @keyframes footerGlow {
+                0%, 100% { transform: scale(1) rotate(0deg); }
+                50% { transform: scale(1.2) rotate(360deg); }
+            }
+
+            .footer-content {
+                position: relative;
+                z-index: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .footer-icon {
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(10px);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+            }
+
+            .footer-icon i {
+                font-size: 20px;
+                color: white;
             }
 
             .ticket-footer p {
                 margin: 0;
-                font-size: 14px;
+                font-size: 16px;
+                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            }
+
+            .footer-decoration {
+                margin-top: 16px;
+                position: relative;
+                z-index: 1;
+            }
+
+            .footer-line {
+                width: 100px;
+                height: 2px;
+                background: rgba(255, 255, 255, 0.6);
+                margin: 0 auto;
+                border-radius: 1px;
             }
 
             /* Responsive adjustments */
             @media (max-width: 768px) {
                 .ticket-header {
-                    padding: 20px 16px;
+                    padding: 24px 16px;
                 }
 
                 .main-title {
-                    font-size: 20px;
+                    font-size: 24px;
+                }
+
+                .logo-placeholder {
+                    width: 70px;
+                    height: 70px;
+                }
+
+                .logo-placeholder i {
+                    font-size: 32px;
                 }
 
                 .qr-section, .event-details, .speakers-section {
-                    padding: 16px;
+                    padding: 24px 16px;
+                }
+
+                .qr-container {
+                    padding: 20px;
+                }
+
+                .qr-placeholder {
+                    width: 140px;
+                    height: 140px;
+                }
+
+                .qr-placeholder i {
+                    font-size: 64px;
+                }
+
+                .info-item {
+                    padding: 16px 20px;
+                }
+
+                .info-icon {
+                    width: 50px;
+                    height: 50px;
+                    margin-right: 16px;
+                }
+
+                .info-icon i {
+                    font-size: 20px;
                 }
 
                 .speakers-grid {
@@ -1230,7 +1630,45 @@
                 .speaker-card {
                     min-width: auto;
                     width: 100%;
-                    max-width: 280px;
+                    max-width: 320px;
+                }
+            }
+
+            /* Estilos de impresión para asegurar que los backgrounds se impriman */
+            @media print {
+                .info-item {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                    background-color: white !important;
+                    color: #495057 !important;
+                }
+
+                .info-item label {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                    color: #495057 !important;
+                }
+
+                .info-item span {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                    color: #495057 !important;
+                }
+
+                .event-details {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+
+                .ticket {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+
+                /* Forzar que html2canvas capture los backgrounds */
+                * {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
                 }
             }
         `;
